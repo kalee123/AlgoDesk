@@ -154,6 +154,24 @@ main {
     margin: 0 0 20px;
 }
 
+.search-input {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
 .status {
     color: var(--muted);
     padding: 40px 0;

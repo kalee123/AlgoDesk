@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Watch · AlgoDesk</title>
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="market-watch">
+<header id="app-nav" class="navbar"></header>
+
+<main>
+    <h1 class="page-title">Market Watch</h1>
+
+    <input id="search" class="search-input" type="search" autocomplete="off" autofocus
+           placeholder="Search instruments, e.g. RELIANCE, NIFTY, BANKNIFTY FUT"
+           aria-label="Search instruments">
+
+    <div id="status" class="status">Type at least 2 characters to search</div>
+    <div id="content" class="table-wrap" hidden>
+        <table>
+            <thead>
+            <tr>
+                <th>Instrument</th>
+                <th>Name</th>
+                <th>Exchange</th>
+                <th>Type</th>
+                <th>Expiry</th>
+                <th class="num">Strike</th>
+                <th class="num">Lot size</th>
+            </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+        </table>
+    </div>
+</main>
+
+<script src="/js/common.js"></script>
+<script src="/js/market-watch.js"></script>
+</body>
+</html>

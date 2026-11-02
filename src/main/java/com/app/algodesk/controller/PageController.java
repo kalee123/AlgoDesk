@@ -30,6 +30,11 @@ public class PageController {
         return page("positions");
     }
 
+    @GetMapping(value = "/market-watch", produces = MediaType.TEXT_HTML_VALUE)
+    public Resource marketWatch() {
+        return page("market-watch");
+    }
+
     @GetMapping(value = "/logged-out", produces = MediaType.TEXT_HTML_VALUE)
     public Resource loggedOut() {
         return page("logged-out");

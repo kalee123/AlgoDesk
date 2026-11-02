@@ -5,6 +5,7 @@ const NAV_ITEMS = [
     { page: "orders",    label: "Orders",    href: "/orders" },
     { page: "holdings",  label: "Holdings",  href: "/holdings" },
     { page: "positions", label: "Positions", href: "/positions" },
+    { page: "market-watch", label: "Market Watch", href: "/market-watch" },
 ];
 
 // Fills <header id="app-nav"> and highlights the link matching <body data-page="...">
