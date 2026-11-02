@@ -3,6 +3,7 @@ package com.app.algodesk.controller;
 import com.app.algodesk.appsetup.FieldConstants;
 import com.app.algodesk.appsetup.UrlConstants;
 import com.app.algodesk.authentication.UserAuthService;
+import com.app.algodesk.service.MarketDataService;
 import com.app.algodesk.broker.kite.KiteApiClient;
 import com.app.algodesk.entity.AuthTokenEntity;
 import com.app.algodesk.utils.ApiClientUtil;
@@ -28,6 +29,9 @@ public class AuthController {
 
     @Autowired
     UserAuthService userAuthService;
+
+    @Autowired
+    MarketDataService marketDataService;
 
     @GetMapping("/login")
     @ResponseBody
@@ -64,6 +68,8 @@ public class AuthController {
             session.setAttribute(FieldConstants.FIELD_USER_AUTH, true);
             session.setAttribute(FieldConstants.FIELD_USER_ID, token.getUser().getUserId());
             session.setAttribute(FieldConstants.FIELD_TOKEN_EXPIRES_AT, token.getExpiresAt());
+
+            marketDataService.start(token.getAccessToken());
             return redirect("/dashboard");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Authentication failed");
@@ -80,6 +86,8 @@ public class AuthController {
         if (session != null) {
             Long userId = (Long) session.getAttribute(FieldConstants.FIELD_USER_ID);
             if (userId != null) {
+                // Close the socket before the token is killed, so it doesn't retry with a dead token
+                marketDataService.stop();
                 userAuthService.logout(userId);
             }
             session.invalidate();
