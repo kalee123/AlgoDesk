@@ -13,7 +13,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -70,5 +72,19 @@ public class AuthController {
 
     private static ResponseEntity<String> redirect(String location) {
         return ResponseEntity.status(302).header(HttpHeaders.LOCATION, location).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Long userId = (Long) session.getAttribute(FieldConstants.FIELD_USER_ID);
+            if (userId != null) {
+                userAuthService.logout(userId);
+            }
+            session.invalidate();
+        }
+        SecurityContextHolder.clearContext();
+        return redirect("/logged-out");
     }
 }

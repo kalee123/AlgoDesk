@@ -12,8 +12,6 @@ public class UrlConstants {
 
     public static final String KITE_USER_PROFILE_PATH = "/user/profile";
 
-    public static final String KITE_USER_MARGINS_URL = "https://api.kite.trade/user/margins";
-
     public static final String KITE_USER_MARGINS_PATH = "/user/margins";
 
     public static final String KITE_ORDERS_PATH = "/orders";
@@ -21,5 +19,7 @@ public class UrlConstants {
     public static final String KITE_HOLDINGS_PATH = "/portfolio/holdings";
 
     public static final String KITE_POSITIONS_PATH = "/portfolio/positions";
+
+    public static final String KITE_SESSION_TOKEN_PATH = "/session/token";
 
 }

@@ -18,6 +18,9 @@ import java.util.List;
 @Component
 public class SessionAuthFilter extends OncePerRequestFilter {
 
+    // Reachable without logging in (also used by SecurityConfig)
+    static final String[] PUBLIC_PATHS = {"/login", "/kite/callback", "/logged-out"};
+
     private final RqInfo rqInfo;
 
     public SessionAuthFilter(RqInfo rqInfo) {
@@ -44,7 +47,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (path.equals("/login") || path.equals("/kite/callback")) {
+        if (List.of(PUBLIC_PATHS).contains(path) || path.startsWith("/css/")) {
             chain.doFilter(request, response);
             return;
         }

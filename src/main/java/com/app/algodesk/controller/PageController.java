@@ -30,6 +30,11 @@ public class PageController {
         return page("positions");
     }
 
+    @GetMapping(value = "/logged-out", produces = MediaType.TEXT_HTML_VALUE)
+    public Resource loggedOut() {
+        return page("logged-out");
+    }
+
     private static Resource page(String name) {
         return new ClassPathResource("static/" + name + ".html");
     }

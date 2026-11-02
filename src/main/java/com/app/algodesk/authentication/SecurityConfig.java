@@ -20,8 +20,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                // Spring's built-in /logout would hijack ours; AuthController handles logout
+                .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/kite/callback").permitAll()
+                        .requestMatchers(SessionAuthFilter.PUBLIC_PATHS).permitAll()
+                        .requestMatchers("/css/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(sessionAuthFilter, UsernamePasswordAuthenticationFilter.class)

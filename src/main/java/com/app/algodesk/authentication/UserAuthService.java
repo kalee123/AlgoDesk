@@ -45,6 +45,23 @@ public class UserAuthService {
         return saveSession(session);
     }
 
+    /**
+     * Kills the user's active broker tokens at the broker and marks them inactive here.
+     * The local deactivation always happens, even if the broker call fails, so the app
+     * never keeps using a token the user asked to log out of.
+     */
+    @Transactional
+    public void logout(Long userId) {
+        for (AuthTokenEntity token : authTokenRepository.findByUser_UserIdAndActiveTrue(userId)) {
+            try {
+                brokerAuthClient.invalidateSession(token.getAccessToken());
+            } catch (Exception e) {
+                // Already expired at the broker, or broker unreachable: nothing more we can do
+            }
+            token.setActive(false);
+        }
+    }
+
     private AuthTokenEntity saveSession(BrokerSession session) {
         // Upsert the user: same broker user id logging in again reuses the existing row
         UserEntity user = userRepository.findByUserBrokerId(session.userBrokerId())

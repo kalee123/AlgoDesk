@@ -15,7 +15,10 @@ function renderNav() {
     ).join("");
     document.getElementById("app-nav").innerHTML = `
         <a class="brand" href="/dashboard">AlgoDesk</a>
-        <nav>${links}</nav>`;
+        <nav>${links}</nav>
+        <form class="logout" method="post" action="/logout">
+            <button type="submit" class="button-ghost">Log out</button>
+        </form>`;
 }
 
 // GET a JSON API. On 401 (session expired, Kite resets tokens at 6 AM IST) go back to login.

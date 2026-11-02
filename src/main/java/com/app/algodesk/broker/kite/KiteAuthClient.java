@@ -39,6 +39,20 @@ public class KiteAuthClient implements BrokerAuthClient {
     }
 
     @Override
+    public void invalidateSession(String accessToken) throws Exception {
+        String query = "?api_key=" + encode(props.getApiKey()) + "&access_token=" + encode(accessToken);
+        java.net.URL url = new java.net.URL(UrlConstants.BASE_URL + UrlConstants.KITE_SESSION_TOKEN_PATH + query);
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setRequestProperty("X-Kite-Version", "3");
+
+        int status = conn.getResponseCode();
+        if (status < 200 || status >= 300) {
+            throw new RuntimeException("Session invalidation failed: " + status);
+        }
+    }
+
+    @Override
     public BrokerSession createSession(String requestToken) throws Exception {
         // Step 1: Create checksum and exchange token with Kite API
         String data = props.getApiKey() + requestToken + props.getApiSecret();
