@@ -9,4 +9,7 @@ public interface AuthTokenRepository extends JpaRepository<AuthTokenEntity, Long
     Optional<AuthTokenEntity> findTopByUser_UserIdAndActiveTrueOrderByIssuedAtDesc(Long userId);
 
     List<AuthTokenEntity> findByUser_UserIdAndActiveTrue(Long userId);
+
+    // Latest active token of any user; for background jobs that run without a logged-in request
+    Optional<AuthTokenEntity> findTopByActiveTrueOrderByIssuedAtDesc();
 }

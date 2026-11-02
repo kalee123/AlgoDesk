@@ -22,4 +22,6 @@ public class UrlConstants {
 
     public static final String KITE_SESSION_TOKEN_PATH = "/session/token";
 
+    public static final String KITE_INSTRUMENTS_PATH = "/instruments";
+
 }

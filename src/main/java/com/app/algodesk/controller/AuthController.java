@@ -3,6 +3,7 @@ package com.app.algodesk.controller;
 import com.app.algodesk.appsetup.FieldConstants;
 import com.app.algodesk.appsetup.UrlConstants;
 import com.app.algodesk.authentication.UserAuthService;
+import com.app.algodesk.service.InstrumentDataService;
 import com.app.algodesk.service.MarketDataService;
 import com.app.algodesk.broker.kite.KiteApiClient;
 import com.app.algodesk.entity.AuthTokenEntity;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @Scope("request")
@@ -32,6 +34,9 @@ public class AuthController {
 
     @Autowired
     MarketDataService marketDataService;
+
+    @Autowired
+    InstrumentDataService instrumentDataService;
 
     @GetMapping("/login")
     @ResponseBody
@@ -70,6 +75,9 @@ public class AuthController {
             session.setAttribute(FieldConstants.FIELD_TOKEN_EXPIRES_AT, token.getExpiresAt());
 
             marketDataService.start(token.getAccessToken());
+            // Download takes a few seconds; run it in the background so the redirect isn't delayed
+            String accessToken = token.getAccessToken();
+            CompletableFuture.runAsync(() -> instrumentDataService.refreshIfNeeded(accessToken));
             return redirect("/dashboard");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Authentication failed");

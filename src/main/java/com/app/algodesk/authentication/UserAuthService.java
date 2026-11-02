@@ -91,4 +91,12 @@ public class UserAuthService {
                 .filter(t -> !t.isExpired())
                 .map(AuthTokenEntity::getAccessToken);
     }
+
+    // Background jobs have no request (so no RqInfo/userId); use whichever session is still valid.
+    // Fine for a single-user app, and the data fetched with it (e.g. instruments) is the same for everyone.
+    public Optional<String> getAnyActiveAccessToken() {
+        return authTokenRepository.findTopByActiveTrueOrderByIssuedAtDesc()
+                .filter(t -> !t.isExpired())
+                .map(AuthTokenEntity::getAccessToken);
+    }
 }

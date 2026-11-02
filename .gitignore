@@ -34,3 +34,6 @@ build/
 
 ### IntelliJ run configs (contain secrets) ###
 .run/
+
+### Runtime data (instrument CSV etc.) ###
+/data/

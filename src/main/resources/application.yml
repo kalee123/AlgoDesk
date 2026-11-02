@@ -2,6 +2,8 @@ kite:
   api-key: ${KITE_API_KEY}
   api-secret: ${KITE_API_SECRET}
   user-id: QEX463
+algodesk:
+  data-dir: ${ALGODESK_DATA_DIR:data}   # downloaded files (e.g. instruments CSV); relative = project folder
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/trade_db?currentSchema=tradedb
