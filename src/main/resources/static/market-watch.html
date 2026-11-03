@@ -9,31 +9,31 @@
 <body data-page="market-watch">
 <header id="app-nav" class="navbar"></header>
 
-<main>
-    <h1 class="page-title">Market Watch</h1>
+<div class="workspace">
+    <!-- Left: search + instrument list (like Kite's watchlist) -->
+    <aside class="watch-panel">
+        <div class="watch-search">
+            <input id="search" class="search-input" type="search" autocomplete="off" autofocus
+                   placeholder="Search eg: infy bse, nifty fut"
+                   aria-label="Search instruments">
+        </div>
+        <div id="status" class="watch-status">Type at least 2 characters to search</div>
+        <ul id="results" class="watch-list" hidden></ul>
+    </aside>
 
-    <input id="search" class="search-input" type="search" autocomplete="off" autofocus
-           placeholder="Search instruments, e.g. RELIANCE, NIFTY, BANKNIFTY FUT"
-           aria-label="Search instruments">
-
-    <div id="status" class="status">Type at least 2 characters to search</div>
-    <div id="content" class="table-wrap" hidden>
-        <table>
-            <thead>
-            <tr>
-                <th>Instrument</th>
-                <th>Name</th>
-                <th>Exchange</th>
-                <th>Type</th>
-                <th>Expiry</th>
-                <th class="num">Strike</th>
-                <th class="num">Lot size</th>
-            </tr>
-            </thead>
-            <tbody id="results-body"></tbody>
-        </table>
-    </div>
-</main>
+    <!-- Right: selected instrument; the chart goes here later -->
+    <section class="chart-panel">
+        <div id="chart-empty" class="chart-empty">Select an instrument to view its chart</div>
+        <div id="chart-view" hidden>
+            <div class="chart-header">
+                <span id="chart-symbol" class="symbol"></span>
+                <span id="chart-exchange" class="tag"></span>
+                <span id="chart-name" class="muted"></span>
+            </div>
+            <div class="chart-placeholder muted">Chart coming soon</div>
+        </div>
+    </section>
+</div>
 
 <script src="/js/common.js"></script>
 <script src="/js/market-watch.js"></script>

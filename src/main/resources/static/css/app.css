@@ -156,7 +156,6 @@ main {
 
 .search-input {
     width: 100%;
-    margin-bottom: 16px;
     padding: 10px 14px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -280,3 +279,137 @@ td.num, th.num {
 
 .tag.buy { color: var(--accent); }
 .tag.sell { color: var(--neg); }
+
+.small { font-size: 12px; }
+
+/* ---------- Market Watch: left list + right chart ---------- */
+
+.workspace {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    height: calc(100vh - 56px);   /* full height below the navbar */
+}
+
+.watch-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+}
+
+.watch-search {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.watch-status {
+    padding: 24px 16px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.watch-list {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;   /* only the list scrolls, the search bar stays put */
+}
+
+.watch-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.watch-item:hover { background: var(--bg); }
+
+.watch-item.selected {
+    background: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.watch-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.watch-main > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.watch-tags {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.watch-tags .tag {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.chart-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 16px 20px;
+}
+
+.chart-empty {
+    margin: auto;
+    color: var(--muted);
+}
+
+#chart-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+#chart-view[hidden] { display: none; }
+
+.chart-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 17px;
+}
+
+.chart-header .muted { font-size: 13px; }
+
+.chart-placeholder {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+}
+
+/* Phones: list on top, chart below */
+@media (max-width: 760px) {
+    .workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: 45vh 1fr;
+    }
+
+    .watch-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}
