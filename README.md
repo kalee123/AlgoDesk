@@ -12,24 +12,27 @@ It starts with the basics — logging in through Kite, viewing your account, ord
 - Log in with your Zerodha account via Kite Connect (OAuth-style flow with CSRF `state` check)
 - Broker access token stored server-side in the database — never sent to the browser
 - Session-based authentication; expired Kite tokens (reset daily at 6 AM IST) force a fresh login
-- Dashboard with profile and equity / commodity margins
+- Dashboard: NIFTY 50 / BANK NIFTY / SENSEX strip with intraday sparklines, today's P&L, portfolio value,
+  available margin, order counts, top movers, recent orders and open positions
+- Market Watch: instrument search with a candlestick chart (1m to 1D) powered by TradingView Lightweight Charts
+- Daily sync of Kite's full instrument list (~1 lakh rows) into PostgreSQL
 - Orders (today), Holdings and Positions pages with P&L
 
 **Planned**
-- Live market data over WebSocket
+- Live candles from the market data WebSocket
 - Placing and managing orders from the app
 - Rule-based strategies with paper trading mode
 - Risk controls (max loss per day, kill switch)
 
 ## Screenshots
 
-**Dashboard:** profile and margins
+**Dashboard:** market indices, today's P&L, portfolio, margin and orders at a glance
 
 ![Dashboard](docs/images/dashboard.png)
 
-**Holdings:** portfolio summary and holdings table
+**Market Watch:** search instruments on the left, chart on the right
 
-![Holdings](docs/images/holdings.png)
+![Market Watch](docs/images/market-watch.png)
 
 ## Tech stack
 
@@ -66,8 +69,10 @@ src/main/java/com/app/algodesk/
 ├── broker/           broker-neutral interfaces and models
 │   └── kite/         Kite Connect implementation
 ├── controller/       page and API endpoints
-├── service/          profile, orders, portfolio
-├── entity/           JPA entities (users, auth tokens)
+├── service/          dashboard, market data, candles, instruments, orders, portfolio
+├── scheduler/        daily instrument list refresh
+├── exception/        global API error handler
+├── entity/           JPA entities (users, auth tokens, instruments)
 ├── repository/       Spring Data repositories
 └── appsetup/         constants
 
@@ -110,5 +115,6 @@ Open [http://localhost:8080](http://localhost:8080) and log in with your Zerodha
 
 ## Docs
 - [Kite auth flow](docs/kite-auth-flow.md)
+- [Dashboard](docs/DASHBOARD.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Build guide](docs/BUILD-GUIDE.md)
