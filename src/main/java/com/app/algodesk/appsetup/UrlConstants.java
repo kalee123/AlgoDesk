@@ -26,4 +26,7 @@ public class UrlConstants {
 
     public static final String KITE_INSTRUMENTS_HISTORICAL_PATH = "/instruments/historical";
 
+    // Last price + today's OHLC for up to 1000 instruments: /quote/ohlc?i=NSE:INFY&i=BSE:SENSEX
+    public static final String KITE_QUOTE_OHLC_PATH = "/quote/ohlc";
+
 }

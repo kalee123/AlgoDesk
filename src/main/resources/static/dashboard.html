@@ -10,14 +10,88 @@
 <header id="app-nav" class="navbar"></header>
 
 <main>
-    <h1 class="page-title">Dashboard</h1>
+    <div class="page-head">
+        <h1 class="page-title">Dashboard</h1>
+        <span id="updated" class="muted small"></span>
+    </div>
+
+    <!-- Index strip: /api/market/indices, loads on its own so a failure here doesn't block the page -->
+    <div id="indices" class="index-strip" aria-label="Market indices"></div>
+
     <div id="status" class="status">Loading…</div>
     <div id="content" hidden>
-        <div class="grid">
-            <section class="card" id="profile"></section>
-            <section class="card" id="equity"></section>
-            <section class="card" id="commodity"></section>
+        <!-- KPI tiles: /api/dashboard/summary -->
+        <div class="grid kpis">
+            <section class="card kpi" id="kpi-today"></section>
+            <section class="card kpi" id="kpi-portfolio"></section>
+            <section class="card kpi" id="kpi-margin"></section>
+            <section class="card kpi" id="kpi-orders"></section>
         </div>
+
+        <div class="grid panels">
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Today's movers</h2>
+                    <a href="/holdings">All holdings</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Instrument</th>
+                            <th class="num">LTP</th>
+                            <th class="num">Day chg.</th>
+                            <th class="num">Day P&amp;L</th>
+                        </tr>
+                        </thead>
+                        <tbody id="movers-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Recent orders</h2>
+                    <a href="/orders">All orders</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Instrument</th>
+                            <th class="num">Qty</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="orders-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>Open positions</h2>
+                <a href="/positions">All positions</a>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Instrument</th>
+                        <th>Product</th>
+                        <th class="num">Qty</th>
+                        <th class="num">LTP</th>
+                        <th class="num">Today (M2M)</th>
+                        <th class="num">P&amp;L</th>
+                    </tr>
+                    </thead>
+                    <tbody id="positions-body"></tbody>
+                </table>
+            </div>
+        </section>
     </div>
 </main>
 

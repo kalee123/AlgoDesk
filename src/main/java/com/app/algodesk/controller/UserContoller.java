@@ -1,6 +1,7 @@
 package com.app.algodesk.controller;
 
 import com.app.algodesk.service.UserProfileService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,15 +17,19 @@ public class UserContoller {
         this.userProfileService = userProfileService;
     }
 
-    @GetMapping(value = "/api/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String dashBoard() throws Exception {
+    // Used by the navbar's account menu on every page.
+    // (Replaces the old /api/dashboard; margins now come from /api/dashboard/summary.)
+    @GetMapping(value = "/api/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String profile() throws Exception {
         // Kite wraps every response as {"status": "...", "data": {...}}; keep only the data part
         JSONObject profile = new JSONObject(userProfileService.getProfileDetails()).getJSONObject("data");
-        JSONObject margin = new JSONObject(userProfileService.getMarginDetails()).getJSONObject("data");
-
-        JSONObject result = new JSONObject();
-        result.put("profile_details", profile);
-        result.put("margin_details", margin);
-        return result.toString();
+        JSONArray exchanges = profile.optJSONArray("exchanges");
+        return new JSONObject()
+                .put("user_id", profile.optString("user_id"))
+                .put("user_name", profile.optString("user_name"))
+                .put("email", profile.optString("email"))
+                .put("broker", profile.optString("broker"))
+                .put("exchanges", exchanges != null ? exchanges : new JSONArray())
+                .toString();
     }
 }
