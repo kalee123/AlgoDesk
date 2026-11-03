@@ -3,10 +3,10 @@ package com.app.algodesk.controller;
 import com.app.algodesk.service.UserProfileService;
 import org.json.JSONObject;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// Errors are turned into JSON responses by ApiExceptionHandler
 @RestController
 public class UserContoller {
 
@@ -17,19 +17,14 @@ public class UserContoller {
     }
 
     @GetMapping(value = "/api/dashboard", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> dashBoard() {
-        try {
-            // Kite wraps every response as {"status": "...", "data": {...}}; keep only the data part
-            JSONObject profile = new JSONObject(userProfileService.getProfileDetails()).getJSONObject("data");
-            JSONObject margin = new JSONObject(userProfileService.getMarginDetails()).getJSONObject("data");
+    public String dashBoard() throws Exception {
+        // Kite wraps every response as {"status": "...", "data": {...}}; keep only the data part
+        JSONObject profile = new JSONObject(userProfileService.getProfileDetails()).getJSONObject("data");
+        JSONObject margin = new JSONObject(userProfileService.getMarginDetails()).getJSONObject("data");
 
-            JSONObject result = new JSONObject();
-            result.put("profile_details", profile);
-            result.put("margin_details", margin);
-            return ResponseEntity.ok(result.toString());
-        } catch (Exception e) {
-            return ResponseEntity.status(502)
-                    .body(new JSONObject().put("error", "Could not load dashboard").toString());
-        }
+        JSONObject result = new JSONObject();
+        result.put("profile_details", profile);
+        result.put("margin_details", margin);
+        return result.toString();
     }
 }
