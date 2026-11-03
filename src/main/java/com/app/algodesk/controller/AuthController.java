@@ -74,7 +74,7 @@ public class AuthController {
             session.setAttribute(FieldConstants.FIELD_USER_ID, token.getUser().getUserId());
             session.setAttribute(FieldConstants.FIELD_TOKEN_EXPIRES_AT, token.getExpiresAt());
 
-            marketDataService.start(token.getAccessToken());
+//            marketDataService.start(token.getAccessToken());
             // Download takes a few seconds; run it in the background so the redirect isn't delayed
             String accessToken = token.getAccessToken();
             CompletableFuture.runAsync(() -> instrumentDataService.refreshIfNeeded(accessToken));
@@ -95,7 +95,7 @@ public class AuthController {
             Long userId = (Long) session.getAttribute(FieldConstants.FIELD_USER_ID);
             if (userId != null) {
                 // Close the socket before the token is killed, so it doesn't retry with a dead token
-                marketDataService.stop();
+//                marketDataService.stop();
                 userAuthService.logout(userId);
             }
             session.invalidate();
