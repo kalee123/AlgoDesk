@@ -24,4 +24,6 @@ public class UrlConstants {
 
     public static final String KITE_INSTRUMENTS_PATH = "/instruments";
 
+    public static final String KITE_INSTRUMENTS_HISTORICAL_PATH = "/instruments/historical";
+
 }

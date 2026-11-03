@@ -393,13 +393,72 @@ td.num, th.num {
 
 .chart-header .muted { font-size: 13px; }
 
-.chart-placeholder {
-    display: grid;
+.chart-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-bottom: 10px;
+}
+
+.interval-group {
+    display: flex;
+    gap: 4px;
+}
+
+.interval {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.interval:hover { color: var(--text); }
+
+.interval.active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.chart-legend {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* The chart library sizes itself to #chart (autoSize), so the box must have a real height */
+.chart-box {
+    position: relative;
     flex: 1;
-    place-items: center;
-    border: 1px dashed var(--border);
+    min-height: 300px;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 10px;
 }
+
+#chart {
+    position: absolute;
+    inset: 0;
+}
+
+.chart-status {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    background: var(--card);
+    color: var(--muted);
+}
+
+.chart-status[hidden] { display: none; }
 
 /* Phones: list on top, chart below */
 @media (max-width: 760px) {

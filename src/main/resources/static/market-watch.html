@@ -30,11 +30,20 @@
                 <span id="chart-exchange" class="tag"></span>
                 <span id="chart-name" class="muted"></span>
             </div>
-            <div class="chart-placeholder muted">Chart coming soon</div>
+            <div class="chart-toolbar">
+                <div id="intervals" class="interval-group" role="group" aria-label="Candle interval"></div>
+                <span id="chart-legend" class="chart-legend"></span>
+            </div>
+            <div class="chart-box">
+                <div id="chart"></div>
+                <div id="chart-status" class="chart-status" hidden></div>
+            </div>
         </div>
     </section>
 </div>
 
+<!-- TradingView Lightweight Charts (v4 API: chart.addCandlestickSeries) -->
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 <script src="/js/common.js"></script>
 <script src="/js/market-watch.js"></script>
 </body>
