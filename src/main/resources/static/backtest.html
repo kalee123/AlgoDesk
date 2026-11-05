@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backtest · AlgoDesk</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/app.css">
+<script src="/js/theme.js"></script>
+</head>
+<body data-page="backtest">
+<header id="app-nav" class="navbar"></header>
+
+<div class="workspace">
+    <!-- Left: setup. Stays put while the results on the right scroll. -->
+    <aside class="watch-panel bt-setup">
+        <form id="setup" class="bt-form">
+            <div class="bt-field">
+                <span class="label">Instrument</span>
+                <div class="search-box">
+                    <input id="search" class="search-input" type="search" autocomplete="off" autofocus
+                           placeholder="Search eg: reliance, nifty 50" aria-label="Search instruments" required>
+                    <ul id="search-results" class="search-results" hidden></ul>
+                </div>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Strategy</span>
+                <select id="strategy" class="search-input">
+                    <option value="orb" selected>Opening Range Breakout</option>
+                </select>
+                <p class="muted small bt-hint">
+                    Range 09:15–09:30 · enter on the first close outside it · stop = other side of the range ·
+                    target 2× risk · square off 15:15 · one trade a day.
+                </p>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Candles</span>
+                <div class="interval-group" id="intervals" role="group" aria-label="Candle interval">
+                    <button type="button" class="interval" data-interval="minute">1m</button>
+                    <button type="button" class="interval" data-interval="3minute">3m</button>
+                    <button type="button" class="interval active" data-interval="5minute">5m</button>
+                    <button type="button" class="interval" data-interval="15minute">15m</button>
+                    <button type="button" class="interval" data-interval="30minute">30m</button>
+                </div>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Period (ends today)</span>
+                <div class="interval-group" id="ranges" role="group" aria-label="Period">
+                    <button type="button" class="interval" data-days="30">1M</button>
+                    <button type="button" class="interval" data-days="60">2M</button>
+                    <button type="button" class="interval active" data-days="90">3M</button>
+                    <button type="button" class="interval" data-days="custom">Custom</button>
+                </div>
+                <div id="custom-range" class="bt-dates" hidden>
+                    <input id="from" class="search-input" type="date" aria-label="From">
+                    <span class="muted">to</span>
+                    <input id="to" class="search-input" type="date" aria-label="To">
+                </div>
+                <p id="range-text" class="muted small"></p>
+            </div>
+
+            <button type="submit" class="button bt-run" id="run">Run backtest</button>
+            <p id="form-error" class="bt-error" hidden></p>
+        </form>
+    </aside>
+
+    <!-- Right: results, scrolls on its own -->
+    <section class="chart-panel bt-results">
+        <div id="status" class="chart-empty">Pick an instrument, then run the backtest</div>
+
+        <div id="content" hidden>
+            <div class="bt-head">
+                <span id="chart-title" class="symbol"></span>
+                <span id="chart-legend" class="chart-legend"></span>
+            </div>
+
+            <div class="stat-grid" id="stats"></div>
+
+            <div class="chart-box bt-chart">
+                <div id="chart"></div>
+            </div>
+
+            <div class="panel-head">
+                <h2>Trades</h2>
+                <span class="muted small">Points per share, before costs · click a row to see it on the chart</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Side</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>Reason</th>
+                        <th class="num">P&amp;L</th>
+                        <th class="num">%</th>
+                    </tr>
+                    </thead>
+                    <tbody id="trades-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/backtest.js"></script>
+</body>
+</html>

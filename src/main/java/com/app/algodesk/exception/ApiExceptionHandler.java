@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 // One place that turns exceptions thrown by any @RestController into a JSON error response,
 // so controller methods only handle the success case (no try/catch in each one).
@@ -30,6 +31,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
     public ResponseEntity<String> handleBadInput(Exception e) {
         return error(400, e.getMessage());
+    }
+
+    // A URL with no controller or static file, e.g. the browser's automatic /favicon.ico request.
+    // Without this, the catch-all below would log it as an error and answer 502.
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<String> handleNotFound(NoResourceFoundException e) {
+        return error(404, "Not found");
     }
 
     // Everything else: Kite down, timeout, or a bug. Log the full stack trace; don't leak details to the browser.

@@ -6,10 +6,12 @@ import com.app.algodesk.service.CandleService;
 import com.app.algodesk.service.InstrumentSearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,6 +67,16 @@ class ApiExceptionHandlerTest {
         mvc.perform(get("/api/instruments/NSE/RELIANCE/candles?from=abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
+    }
+
+    @Test
+    void missingStaticFileIs404NotBadGateway() throws Exception {
+        when(candleService.getHistoricCandles(any()))
+                .thenThrow(new NoResourceFoundException(HttpMethod.GET, "favicon.ico"));
+
+        mvc.perform(get("/api/instruments/NSE/RELIANCE/candles"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Not found"));
     }
 
     @Test

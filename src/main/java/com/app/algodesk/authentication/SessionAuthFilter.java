@@ -19,7 +19,7 @@ import java.util.List;
 public class SessionAuthFilter extends OncePerRequestFilter {
 
     // Reachable without logging in (also used by SecurityConfig)
-    static final String[] PUBLIC_PATHS = {"/login", "/kite/callback", "/logged-out"};
+    static final String[] PUBLIC_PATHS = {"/login", "/kite/callback", "/logged-out", "/favicon.svg"};
 
     private final RqInfo rqInfo;
 

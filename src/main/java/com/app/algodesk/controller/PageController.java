@@ -35,6 +35,11 @@ public class PageController {
         return page("market-watch");
     }
 
+    @GetMapping(value = "/backtest", produces = MediaType.TEXT_HTML_VALUE)
+    public Resource backtest() {
+        return page("backtest");
+    }
+
     @GetMapping(value = "/logged-out", produces = MediaType.TEXT_HTML_VALUE)
     public Resource loggedOut() {
         return page("logged-out");

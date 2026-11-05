@@ -6,6 +6,7 @@ const NAV_ITEMS = [
     { page: "holdings",  label: "Holdings",  href: "/holdings" },
     { page: "positions", label: "Positions", href: "/positions" },
     { page: "market-watch", label: "Market Watch", href: "/market-watch" },
+    { page: "backtest", label: "Backtest", href: "/backtest" },
 ];
 
 const PROFILE_CACHE_KEY = "algodesk.profile";
