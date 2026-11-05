@@ -17,10 +17,13 @@ It starts with the basics — logging in through Kite, viewing your account, ord
 - Market Watch: instrument search with a candlestick chart (1m to 1D) powered by TradingView Lightweight Charts
 - Daily sync of Kite's full instrument list (~1 lakh rows) into PostgreSQL
 - Orders (today), Holdings and Positions pages with P&L
+- Backtest: run the Opening Range Breakout strategy on historical intraday candles, with win rate,
+  profit factor, drawdown, trades marked on the chart and a trade-by-trade table
 
 **Planned**
 - Live candles from the market data WebSocket
 - Placing and managing orders from the app
+- More strategies, trading costs and a candle store so backtests run offline
 - Rule-based strategies with paper trading mode
 - Risk controls (max loss per day, kill switch)
 
@@ -33,6 +36,10 @@ It starts with the basics — logging in through Kite, viewing your account, ord
 **Market Watch:** search instruments on the left, chart on the right
 
 ![Market Watch](docs/images/market-watch.png)
+
+**Backtest:** pick an instrument, candle size and period; see the stats, the trades on the chart and each trade's result
+
+![Backtest](docs/images/backtest.png)
 
 ## Tech stack
 
@@ -68,8 +75,9 @@ src/main/java/com/app/algodesk/
 ├── authentication/   session filter, security config, login service, per-request context
 ├── broker/           broker-neutral interfaces and models
 │   └── kite/         Kite Connect implementation
+├── backtest/         strategies and result stats (pure logic, no I/O)
 ├── controller/       page and API endpoints
-├── service/          dashboard, market data, candles, instruments, orders, portfolio
+├── service/          dashboard, market data, candles, instruments, orders, portfolio, backtester
 ├── scheduler/        daily instrument list refresh
 ├── exception/        global API error handler
 ├── entity/           JPA entities (users, auth tokens, instruments)
