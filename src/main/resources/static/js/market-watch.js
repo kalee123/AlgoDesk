@@ -116,9 +116,10 @@ function chartTheme() {
     };
 }
 
+// Filled candles in the chart palette (stronger than the text colours so up/down stand apart)
 function candleColors() {
-    const up = cssVar("--pos");
-    const down = cssVar("--neg");
+    const up = cssVar("--candle-up");
+    const down = cssVar("--candle-down");
     return { upColor: up, downColor: down, wickUpColor: up, wickDownColor: down, borderVisible: false };
 }
 
@@ -141,13 +142,16 @@ function createChart() {
         renderLegend(candle || lastCandle);
     });
 
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    // Re-colour when the system theme changes or the navbar switch is used
+    const applyTheme = () => {
         chart.applyOptions(chartTheme());
         candleSeries.applyOptions(candleColors());
         if (selected) {
             loadCandles();   // volume bar colours are per bar, so redraw them
         }
-    });
+    };
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+    window.addEventListener("themechange", applyTheme);
 }
 
 function renderLegend(c) {
@@ -191,8 +195,8 @@ async function loadCandles() {
         const candles = data.map(c => ({
             time: c.time + IST_OFFSET_SECONDS, open: c.open, high: c.high, low: c.low, close: c.close,
         }));
-        const up = withAlpha(cssVar("--pos"), 0.4);
-        const down = withAlpha(cssVar("--neg"), 0.4);
+        const up = withAlpha(cssVar("--candle-up"), 0.4);
+        const down = withAlpha(cssVar("--candle-down"), 0.4);
         // Indices have no volume (always 0); skip the bars instead of drawing a flat line
         const hasVolume = data.some(c => c.volume > 0);
         const volumes = hasVolume ? data.map(c => ({

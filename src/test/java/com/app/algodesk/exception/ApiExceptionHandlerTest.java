@@ -1,6 +1,7 @@
 package com.app.algodesk.exception;
 
 import com.app.algodesk.controller.InstrumentController;
+import com.app.algodesk.models.CandleInfo;
 import com.app.algodesk.service.CandleService;
 import com.app.algodesk.service.InstrumentSearchService;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,9 +12,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,17 +41,18 @@ class ApiExceptionHandlerTest {
 
     @Test
     void successPassesThrough() throws Exception {
-        when(candleService.getHistoricCandles(eq("NSE"), eq("RELIANCE"), eq("day"), any(), any()))
-                .thenReturn("[{\"time\":1}]");
+        when(candleService.getHistoricCandles(argThat(r -> r.getExchange().equals("NSE")
+                && r.getSymbol().equals("RELIANCE") && r.getInterval().equals("day"))))
+                .thenReturn(List.of(new CandleInfo(1, 100, 110, 90, 105, 500)));
 
         mvc.perform(get("/api/instruments/NSE/RELIANCE/candles"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[{\"time\":1}]"));
+                .andExpect(content().json("[{\"time\":1,\"open\":100,\"high\":110,\"low\":90,\"close\":105,\"volume\":500}]"));
     }
 
     @Test
     void responseStatusExceptionKeepsItsStatusAndReason() throws Exception {
-        when(candleService.getHistoricCandles(any(), any(), any(), any(), any()))
+        when(candleService.getHistoricCandles(any()))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown instrument NSE:NOPE"));
 
         mvc.perform(get("/api/instruments/NSE/NOPE/candles"))
@@ -66,7 +69,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void anyOtherExceptionIs502WithoutLeakingDetails() throws Exception {
-        when(candleService.getHistoricCandles(any(), any(), any(), any(), any()))
+        when(candleService.getHistoricCandles(any()))
                 .thenThrow(new IOException("connect timed out to api.kite.trade"));
 
         mvc.perform(get("/api/instruments/NSE/RELIANCE/candles"))

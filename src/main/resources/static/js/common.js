@@ -20,6 +20,7 @@ function renderNav() {
     document.getElementById("app-nav").innerHTML = `
         <a class="brand" href="/dashboard">AlgoDesk</a>
         <nav>${links}</nav>
+        <button type="button" class="theme-toggle" id="theme-toggle"></button>
         <details class="account-menu">
             <summary>
                 <span class="avatar" id="account-avatar">·</span>
@@ -33,6 +34,9 @@ function renderNav() {
             </div>
         </details>`;
 
+    document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+    updateThemeButton();
+
     document.getElementById("logout-form").addEventListener("submit", () => {
         try { sessionStorage.removeItem(PROFILE_CACHE_KEY); } catch (e) { /* storage blocked: nothing cached */ }
     });
@@ -44,6 +48,33 @@ function renderNav() {
         }
     });
     loadAccount();
+}
+
+// ---------- Theme ----------
+// theme.js (in <head>) applies a saved choice before the page draws; this is the switch.
+
+const THEME_KEY = "algodesk.theme";
+
+function currentTheme() {
+    return document.documentElement.dataset.theme
+        || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+
+function updateThemeButton() {
+    const button = document.getElementById("theme-toggle");
+    const dark = currentTheme() === "dark";
+    button.textContent = dark ? "☀" : "☾";   // shows what you'll switch TO
+    button.title = dark ? "Switch to light theme" : "Switch to dark theme";
+    button.setAttribute("aria-label", button.title);
+}
+
+function toggleTheme() {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* not saved, still applied */ }
+    updateThemeButton();
+    // Charts draw with colours read from CSS at draw time, so tell them to redraw
+    window.dispatchEvent(new Event("themechange"));
 }
 
 // The profile barely changes, so fetch it once per browser tab and reuse it on every page

@@ -3,6 +3,8 @@ package com.app.algodesk.service;
 import com.app.algodesk.appsetup.UrlConstants;
 import com.app.algodesk.authentication.RqInfo;
 import com.app.algodesk.broker.kite.KiteApiClient;
+import com.app.algodesk.models.CandleInfo;
+import com.app.algodesk.models.HistoricalDataRequest;
 import com.app.algodesk.repository.InstrumentRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,9 +15,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 // Historical candles for the chart, fetched from Kite on demand (not stored).
@@ -52,10 +57,10 @@ public class CandleService {
         this.rqInfo = rqInfo;
     }
 
-    // Returns [{time, open, high, low, close, volume}, ...] with time in epoch seconds (what chart libraries expect).
+    // Candles oldest first, time in epoch seconds (what chart libraries expect); oi is set only when request.isOi().
     // from/to are optional: when missing, the range is chosen to give about 500 candles for the interval.
-    public String getHistoricCandles(String exchange, String symbol, String interval,
-                                     LocalDate from, LocalDate to) throws Exception {
+    public List<CandleInfo> getHistoricCandles(HistoricalDataRequest request) throws Exception {
+        String interval = request.getInterval();
         int[] intervalInfo = INTERVALS.get(interval);
         if (intervalInfo == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -64,42 +69,45 @@ public class CandleService {
         int minutesPerCandle = intervalInfo[0];
         int maxDays = intervalInfo[1];
 
-        LocalDate endDate = to != null ? to : LocalDate.now(IST);
-        LocalDate startDate = from != null ? from : endDate.minusDays(daysFor500Candles(minutesPerCandle, maxDays));
-        if (startDate.isAfter(endDate)) {
+        LocalDateTime endTime = request.getTo() != null ? request.getTo() : LocalDate.now(IST).atTime(23, 59, 59);
+        LocalDateTime startTime = request.getFrom() != null ? request.getFrom()
+                : endTime.toLocalDate().minusDays(daysFor500Candles(minutesPerCandle, maxDays)).atStartOfDay();
+        if (startTime.isAfter(endTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'from' must not be after 'to'");
         }
-        if (startDate.plusDays(maxDays).isBefore(endDate)) {
+        if (startTime.plusDays(maxDays).isBefore(endTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Range too long for " + interval + ": Kite allows at most " + maxDays + " days per request");
         }
 
-        long token = getSymbolVsExchangeId(exchange, symbol);
+        long token = getSymbolVsExchangeId(request.getExchange(), request.getSymbol());
 
         String path = UrlConstants.KITE_INSTRUMENTS_HISTORICAL_PATH + "/" + token + "/" + interval
-                + "?from=" + encode(startDate.atStartOfDay().format(KITE_PARAM_FORMAT))
-                + "&to=" + encode(endDate.atTime(23, 59, 59).format(KITE_PARAM_FORMAT));
+                + "?from=" + encode(startTime.format(KITE_PARAM_FORMAT))
+                + "&to=" + encode(endTime.format(KITE_PARAM_FORMAT))
+                + "&continuous=" + (request.isContinuous() ? 1 : 0)
+                + "&oi=" + (request.isOi() ? 1 : 0);
 
-        // data = {"candles": [["2026-11-02T09:15:00+0530", open, high, low, close, volume], ...]}
+        // data = {"candles": [["2026-11-02T09:15:00+0530", open, high, low, close, volume(, oi)], ...]}
         JSONArray kiteCandles = new JSONObject(kiteApiClient.getData(path, rqInfo.getAccessToken()))
                 .getJSONArray("candles");
 
         // The day-count estimate is rough (holidays, MCX's longer hours), so only keep the latest 500
         // when the range was chosen by us; an explicit from/to gets everything in it.
-        int first = (from == null) ? Math.max(0, kiteCandles.length() - TARGET_CANDLES) : 0;
+        int first = (request.getFrom() == null) ? Math.max(0, kiteCandles.length() - TARGET_CANDLES) : 0;
 
-        JSONArray candles = new JSONArray();
+        List<CandleInfo> candles = new ArrayList<>();
         for (int i = first; i < kiteCandles.length(); i++) {
             JSONArray c = kiteCandles.getJSONArray(i);
-            candles.put(new JSONObject()
-                    .put("time", OffsetDateTime.parse(c.getString(0), KITE_CANDLE_FORMAT).toEpochSecond())
-                    .put("open", c.getBigDecimal(1))
-                    .put("high", c.getBigDecimal(2))
-                    .put("low", c.getBigDecimal(3))
-                    .put("close", c.getBigDecimal(4))
-                    .put("volume", c.getLong(5)));
+            CandleInfo candle = new CandleInfo(
+                    OffsetDateTime.parse(c.getString(0), KITE_CANDLE_FORMAT).toEpochSecond(),
+                    c.getDouble(1), c.getDouble(2), c.getDouble(3), c.getDouble(4), c.getLong(5));
+            if (request.isOi()) {
+                candle.setOi(c.getLong(6));
+            }
+            candles.add(candle);
         }
-        return candles.toString();
+        return candles;
     }
 
     // e.g. 5minute: 375 / 5 = 75 candles a day -> 500 / 75 = 7 trading days -> ~10 calendar days (+ weekends)

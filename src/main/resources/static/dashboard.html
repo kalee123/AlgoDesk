@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dashboard · AlgoDesk</title>
 <link rel="stylesheet" href="/css/app.css">
+<script src="/js/theme.js"></script>
 </head>
 <body data-page="dashboard">
 <header id="app-nav" class="navbar"></header>
 
 <main>
+    <!-- No page title: the navbar already says where you are -->
     <div class="page-head">
-        <h1 class="page-title">Dashboard</h1>
         <span id="updated" class="muted small"></span>
     </div>
 
@@ -20,16 +21,15 @@
 
     <div id="status" class="status">Loading…</div>
     <div id="content" hidden>
-        <!-- KPI tiles: /api/dashboard/summary -->
+        <!-- KPI tiles + movers: /api/dashboard/summary.
+             With 3 columns the 4th tile starts a second row; movers fills the rest of that row. -->
         <div class="grid kpis">
             <section class="card kpi" id="kpi-today"></section>
             <section class="card kpi" id="kpi-portfolio"></section>
             <section class="card kpi" id="kpi-margin"></section>
             <section class="card kpi" id="kpi-orders"></section>
-        </div>
 
-        <div class="grid panels">
-            <section class="panel">
+            <section class="panel movers-panel">
                 <div class="panel-head">
                     <h2>Today's movers</h2>
                     <a href="/holdings">All holdings</a>
@@ -48,7 +48,9 @@
                     </table>
                 </div>
             </section>
+        </div>
 
+        <div class="grid panels">
             <section class="panel">
                 <div class="panel-head">
                     <h2>Recent orders</h2>
@@ -69,29 +71,29 @@
                     </table>
                 </div>
             </section>
-        </div>
 
-        <section class="panel">
-            <div class="panel-head">
-                <h2>Open positions</h2>
-                <a href="/positions">All positions</a>
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Instrument</th>
-                        <th>Product</th>
-                        <th class="num">Qty</th>
-                        <th class="num">LTP</th>
-                        <th class="num">Today (M2M)</th>
-                        <th class="num">P&amp;L</th>
-                    </tr>
-                    </thead>
-                    <tbody id="positions-body"></tbody>
-                </table>
-            </div>
-        </section>
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Open positions</h2>
+                    <a href="/positions">All positions</a>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Instrument</th>
+                            <th>Product</th>
+                            <th class="num">Qty</th>
+                            <th class="num">LTP</th>
+                            <th class="num">Today (M2M)</th>
+                            <th class="num">P&amp;L</th>
+                        </tr>
+                        </thead>
+                        <tbody id="positions-body"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </div>
 </main>
 

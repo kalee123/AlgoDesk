@@ -1,7 +1,9 @@
 package com.app.algodesk.controller;
 
+import com.app.algodesk.models.HistoricalDataRequest;
 import com.app.algodesk.service.CandleService;
 import com.app.algodesk.service.InstrumentSearchService;
+import org.json.JSONArray;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,11 @@ public class InstrumentController {
             @RequestParam(defaultValue = "day") String interval,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) throws Exception {
-        return candleService.getHistoricCandles(exchange, symbol, interval, from, to);
+        // Dates from the browser become whole days: from 00:00:00, to 23:59:59
+        HistoricalDataRequest request = new HistoricalDataRequest(exchange, symbol, interval,
+                from != null ? from.atStartOfDay() : null,
+                to != null ? to.atTime(23, 59, 59) : null);
+        // org.json reads the getters: [{time, open, high, low, close, volume}, ...]
+        return new JSONArray(candleService.getHistoricCandles(request)).toString();
     }
 }
