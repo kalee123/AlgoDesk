@@ -71,6 +71,22 @@ document.addEventListener("click", e => {
     }
 });
 
+// ---------- Strategy hint ----------
+
+const STRATEGY_HINTS = {
+    orb: "Range 09:15–09:30 · enter on the first close outside it · stop = other side of the range · "
+        + "target 2× risk · square off 15:15 · one trade a day.",
+    pdb: "Levels = previous day's high and low · enter on the first close beyond one · stop = signal candle's "
+        + "low/high (min 0.3%, skip above 1.5%) · target 2× risk · square off 15:15 · gap days skipped.",
+};
+
+const strategySelect = document.getElementById("strategy");
+
+function updateHint() {
+    document.getElementById("strategy-hint").textContent = STRATEGY_HINTS[strategySelect.value] || "";
+}
+strategySelect.addEventListener("change", updateHint);
+
 // ---------- Interval + period buttons ----------
 
 let currentInterval = "5minute";
@@ -320,7 +336,7 @@ function hhmm(epoch) {
 function renderTrades(trades) {
     document.getElementById("trades-body").innerHTML = tableRows(trades, 7, "No trades in this period", (t, index) => `
         <tr class="trade-row" data-index="${index}"
-            title="Range ${number(t.rangeLow)} – ${number(t.rangeHigh)} · stop ${number(t.stopLoss)} · target ${number(t.target)}">
+            title="Levels ${number(t.rangeLow)} – ${number(t.rangeHigh)} · stop ${number(t.stopLoss)} · target ${number(t.target)}">
             <td>${escapeHtml(t.date)}</td>
             <td><span class="tag ${t.direction === "LONG" ? "buy" : "sell"}">${t.direction}</span></td>
             <td>${hhmm(t.entryTime)} <span class="muted">@</span> ${number(t.entryPrice)}</td>
@@ -355,10 +371,14 @@ if (initial.get("range") === "custom") {
 }
 pick("ranges", "days", rangeDays);
 updateRangeText();
+if (STRATEGY_HINTS[initial.get("strategy")]) {
+    strategySelect.value = initial.get("strategy");
+}
+updateHint();
 
 if (initial.get("exchange") && initial.get("symbol")) {
     selectInstrument({ exchange: initial.get("exchange"), tradingsymbol: initial.get("symbol") });
     const p = period();
     run({ exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
-          from: p.from, to: p.to, strategy: initial.get("strategy") || "orb" });
+          from: p.from, to: p.to, strategy: strategySelect.value });
 }
