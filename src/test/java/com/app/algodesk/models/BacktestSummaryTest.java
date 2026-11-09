@@ -1,7 +1,5 @@
-package com.app.algodesk.backtest;
+package com.app.algodesk.models;
 
-import com.app.algodesk.models.CandleInfo;
-import com.app.algodesk.models.Trade;
 import com.app.algodesk.models.Trade.Direction;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;

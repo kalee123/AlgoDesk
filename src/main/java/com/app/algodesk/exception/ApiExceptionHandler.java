@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,8 +29,11 @@ public class ApiExceptionHandler {
         return error(e.getStatusCode().value(), e.getReason());
     }
 
-    // Thrown by Spring itself for bad request values, e.g. ?from=abc for a LocalDate or a missing required param
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    // Thrown by Spring itself for bad request values: ?from=abc for a LocalDate (BindException when the
+    // target is a request object, TypeMismatch for a plain @RequestParam), a missing required param,
+    // or a JSON body that can't be read into the request object
+    @ExceptionHandler({BindException.class, MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<String> handleBadInput(Exception e) {
         return error(400, e.getMessage());
     }

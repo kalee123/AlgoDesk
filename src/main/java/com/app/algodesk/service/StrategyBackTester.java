@@ -1,10 +1,11 @@
 package com.app.algodesk.service;
 
-import com.app.algodesk.backtest.BacktestResult;
 import com.app.algodesk.backtest.OpeningRangeBreakout;
 import com.app.algodesk.backtest.PreviousDayBreakout;
+import com.app.algodesk.models.BacktestResult;
 import com.app.algodesk.models.CandleInfo;
 import com.app.algodesk.models.HistoricalDataRequest;
+import com.app.algodesk.models.StrategyCode;
 import com.app.algodesk.models.Trade;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,18 +24,16 @@ public class StrategyBackTester {
 
     // Fetches the candles, then runs the strategy over them (the strategy itself does no I/O)
     public BacktestResult backTest(HistoricalDataRequest request, String strategy) throws Exception {
-        String key = strategy.toLowerCase();
-        if (!key.equals("orb") && !key.equals("pdb")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown strategy '" + strategy + "'. Use orb or pdb");
-        }
+        StrategyCode code = StrategyCode.fromCode(strategy).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown strategy '" + strategy + "'"));
         if ("day".equals(request.getInterval())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Intraday strategies need intraday candles, e.g. 5minute");
         }
         List<CandleInfo> candles = candleService.getHistoricCandles(request);
-        List<Trade> trades = switch (key) {
-            case "orb" -> OpeningRangeBreakout.run(candles);
-            case "pdb" -> PreviousDayBreakout.run(candles);
-            default -> throw new IllegalStateException(key);
+        // Exhaustive switch over the enum: adding a StrategyCode without a case here is a compile error
+        List<Trade> trades = switch (code) {
+            case ORB -> OpeningRangeBreakout.run(candles);
+            case PDB -> PreviousDayBreakout.run(candles);
         };
         return new BacktestResult(candles, trades);
     }

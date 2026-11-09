@@ -1,18 +1,17 @@
 package com.app.algodesk.controller;
 
+import com.app.algodesk.models.BacktestResult;
 import com.app.algodesk.models.HistoricalDataRequest;
+import com.app.algodesk.models.StrategyCode;
 import com.app.algodesk.service.StrategyBackTester;
+import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-
-// Backtests only read candles and compute, nothing is saved, so GET with query params:
-// the same URL always gives the same answer and the page can keep it in its address bar.
+// Strategies are the resource; a backtest is an action on one of them, so it hangs off the strategy's URL.
 @RestController
-@RequestMapping(value = "/api/backtests", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/strategies", produces = MediaType.APPLICATION_JSON_VALUE)
 public class StrategiesController {
 
     private final StrategyBackTester strategyBackTester;
@@ -21,19 +20,26 @@ public class StrategiesController {
         this.strategyBackTester = strategyBackTester;
     }
 
-    // e.g. /api/backtests/orb?exchange=NSE&symbol=RELIANCE&interval=5minute&from=2025-01-01&to=2025-03-31
+    // GET /api/strategies -> [{code, name, description}, ...]; fills the dropdown on the Backtest page.
+    // Strategies are an enum today, so there's nothing to look up: just shape it for the browser.
+    @GetMapping
+    public String list() {
+        JSONArray out = new JSONArray();
+        for (StrategyCode s : StrategyCode.values()) {
+            out.put(new JSONObject()
+                    .put("code", s.getCode())
+                    .put("name", s.getName())
+                    .put("description", s.getDescription()));
+        }
+        return out.toString();
+    }
+
+    // POST /api/strategies/orb/backtest with a JSON body
+    // {"exchange":"NSE","symbol":"RELIANCE","interval":"5minute","from":"2025-01-01","to":"2025-03-31"}
     // -> {candles: [...], trades: [...], summary: {...}}
-    @GetMapping("/{strategy}")
-    public String backtest(
-            @PathVariable String strategy,
-            @RequestParam String exchange,
-            @RequestParam String symbol,
-            @RequestParam(defaultValue = "5minute") String interval,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) throws Exception {
-        HistoricalDataRequest request = new HistoricalDataRequest(exchange, symbol, interval,
-                from.atStartOfDay(), to.atTime(23, 59, 59));
-        // org.json reads the getters of BacktestResult, its lists and the summary
-        return new JSONObject(strategyBackTester.backTest(request, strategy)).toString();
+    @PostMapping("/{code}/backtest")
+    public String backtest(@PathVariable String code, @RequestBody HistoricalDataRequest historicalData) throws Exception {
+        BacktestResult result = strategyBackTester.backTest(historicalData, code);
+        return new JSONObject(result).toString();
     }
 }

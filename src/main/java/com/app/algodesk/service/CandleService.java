@@ -69,9 +69,12 @@ public class CandleService {
         int minutesPerCandle = intervalInfo[0];
         int maxDays = intervalInfo[1];
 
-        LocalDateTime endTime = request.getTo() != null ? request.getTo() : LocalDate.now(IST).atTime(23, 59, 59);
-        LocalDateTime startTime = request.getFrom() != null ? request.getFrom()
-                : endTime.toLocalDate().minusDays(daysFor500Candles(minutesPerCandle, maxDays)).atStartOfDay();
+        // Whole days: 'to' runs to the end of its day, 'from' starts at midnight
+        LocalDate endDate = request.getTo() != null ? request.getTo() : LocalDate.now(IST);
+        LocalDate startDate = request.getFrom() != null ? request.getFrom()
+                : endDate.minusDays(daysFor500Candles(minutesPerCandle, maxDays));
+        LocalDateTime endTime = endDate.atTime(23, 59, 59);
+        LocalDateTime startTime = startDate.atStartOfDay();
         if (startTime.isAfter(endTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'from' must not be after 'to'");
         }

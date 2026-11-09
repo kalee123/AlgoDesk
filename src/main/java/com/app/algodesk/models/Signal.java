@@ -1,4 +1,4 @@
-package com.app.algodesk.backtest;
+package com.app.algodesk.models;
 
 import com.app.algodesk.models.Trade.Direction;
 

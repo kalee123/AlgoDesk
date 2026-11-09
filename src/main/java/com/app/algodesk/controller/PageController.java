@@ -35,7 +35,8 @@ public class PageController {
         return page("market-watch");
     }
 
-    @GetMapping(value = "/backtest", produces = MediaType.TEXT_HTML_VALUE)
+    // /backtest and /backtest/orb serve the same page; the script reads the strategy from the path
+    @GetMapping(value = {"/backtest", "/backtest/{strategy}"}, produces = MediaType.TEXT_HTML_VALUE)
     public Resource backtest() {
         return page("backtest");
     }

@@ -1,6 +1,5 @@
-package com.app.algodesk.backtest;
+package com.app.algodesk.models;
 
-import com.app.algodesk.models.Trade;
 
 import java.util.List;
 import java.util.Map;

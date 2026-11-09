@@ -71,21 +71,27 @@ document.addEventListener("click", e => {
     }
 });
 
-// ---------- Strategy hint ----------
-
-const STRATEGY_HINTS = {
-    orb: "Range 09:15–09:30 · enter on the first close outside it · stop = other side of the range · "
-        + "target 2× risk · square off 15:15 · one trade a day.",
-    pdb: "Levels = previous day's high and low · enter on the first close beyond one · stop = signal candle's "
-        + "low/high (min 0.3%, skip above 1.5%) · target 2× risk · square off 15:15 · gap days skipped.",
-};
+// ---------- Strategies (from the server) ----------
 
 const strategySelect = document.getElementById("strategy");
+let strategies = {};   // code -> {code, name, description}
+
+async function loadStrategies() {
+    const list = await api("/api/strategies");
+    strategies = Object.fromEntries(list.map(s => [s.code, s]));
+    strategySelect.innerHTML = list.map(s =>
+        `<option value="${escapeHtml(s.code)}">${escapeHtml(s.name)}</option>`).join("");
+}
 
 function updateHint() {
-    document.getElementById("strategy-hint").textContent = STRATEGY_HINTS[strategySelect.value] || "";
+    const s = strategies[strategySelect.value];
+    document.getElementById("strategy-hint").textContent = s ? s.description : "";
 }
-strategySelect.addEventListener("change", updateHint);
+
+strategySelect.addEventListener("change", () => {
+    updateHint();
+    history.replaceState(null, "", `/backtest/${encodeURIComponent(strategySelect.value)}`);
+});
 
 // ---------- Interval + period buttons ----------
 
@@ -161,11 +167,28 @@ form.addEventListener("submit", e => {
     showFormError("");
     const params = {
         exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
-        from: p.from, to: p.to, strategy: document.getElementById("strategy").value,
+        from: p.from, to: p.to, strategy: strategySelect.value,
     };
-    history.replaceState(null, "", "?" + new URLSearchParams({ ...params, range: rangeDays }));
+    saveSetup();
     run(params);
 });
+
+// The address bar only shows /backtest/<strategy>; the rest of the setup is remembered per browser
+const SETUP_KEY = "algodesk.backtest";
+
+function saveSetup() {
+    history.replaceState(null, "", `/backtest/${encodeURIComponent(strategySelect.value)}`);
+    try {
+        localStorage.setItem(SETUP_KEY, JSON.stringify({
+            selected, interval: currentInterval, range: rangeDays,
+            from: document.getElementById("from").value, to: document.getElementById("to").value,
+        }));
+    } catch (e) { /* storage blocked: the page still works, it just won't remember */ }
+}
+
+function loadSetup() {
+    try { return JSON.parse(localStorage.getItem(SETUP_KEY)) || {}; } catch (e) { return {}; }
+}
 
 function showStatus(text) {
     status.textContent = text;
@@ -177,8 +200,11 @@ async function run(p) {
     runButton.disabled = true;
     showStatus("Running…");
     try {
-        const query = new URLSearchParams({ exchange: p.exchange, symbol: p.symbol, interval: p.interval, from: p.from, to: p.to });
-        const res = await fetch(`/api/backtests/${encodeURIComponent(p.strategy)}?${query}`, { headers: { Accept: "application/json" } });
+        const res = await fetch(`/api/strategies/${encodeURIComponent(p.strategy)}/backtest`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ exchange: p.exchange, symbol: p.symbol, interval: p.interval, from: p.from, to: p.to }),
+        });
         if (res.status === 401) {
             window.location.href = "/login";
             return;
@@ -355,30 +381,44 @@ document.getElementById("trades-body").addEventListener("click", e => {
     }
 });
 
-// ---------- Defaults / restore from URL ----------
+// ---------- Start: strategies from the server, strategy from the path, the rest from localStorage ----------
 
-const initial = new URLSearchParams(window.location.search);
-if (document.querySelector(`#intervals [data-interval="${initial.get("interval")}"]`)) {
-    currentInterval = initial.get("interval");
-    pick("intervals", "interval", currentInterval);
-}
-if (initial.get("range") === "custom") {
-    rangeDays = "custom";
-    document.getElementById("from").value = initial.get("from") || "";
-    document.getElementById("to").value = initial.get("to") || "";
-} else if (document.querySelector(`#ranges [data-days="${initial.get("range")}"]`)) {
-    rangeDays = Number(initial.get("range"));
-}
-pick("ranges", "days", rangeDays);
-updateRangeText();
-if (STRATEGY_HINTS[initial.get("strategy")]) {
-    strategySelect.value = initial.get("strategy");
-}
-updateHint();
+async function init() {
+    try {
+        await loadStrategies();
+    } catch (e) {
+        showFormError("Could not load the strategy list");
+        return;
+    }
+    const pathStrategy = decodeURIComponent(window.location.pathname.split("/")[2] || "");
+    if (strategies[pathStrategy]) {
+        strategySelect.value = pathStrategy;
+    }
+    updateHint();
 
-if (initial.get("exchange") && initial.get("symbol")) {
-    selectInstrument({ exchange: initial.get("exchange"), tradingsymbol: initial.get("symbol") });
-    const p = period();
-    run({ exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
-          from: p.from, to: p.to, strategy: strategySelect.value });
+    const saved = loadSetup();
+    if (document.querySelector(`#intervals [data-interval="${saved.interval}"]`)) {
+        currentInterval = saved.interval;
+        pick("intervals", "interval", currentInterval);
+    }
+    if (saved.range === "custom") {
+        rangeDays = "custom";
+        document.getElementById("from").value = saved.from || "";
+        document.getElementById("to").value = saved.to || "";
+    } else if (document.querySelector(`#ranges [data-days="${saved.range}"]`)) {
+        rangeDays = Number(saved.range);
+    }
+    pick("ranges", "days", rangeDays);
+    updateRangeText();
+
+    if (saved.selected && saved.selected.exchange && saved.selected.symbol) {
+        selectInstrument({ exchange: saved.selected.exchange, tradingsymbol: saved.selected.symbol });
+        const p = period();
+        if (p.from && p.to) {
+            run({ exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
+                  from: p.from, to: p.to, strategy: strategySelect.value });
+        }
+    }
 }
+
+init();
