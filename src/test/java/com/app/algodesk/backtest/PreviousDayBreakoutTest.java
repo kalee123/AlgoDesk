@@ -38,7 +38,7 @@ class PreviousDayBreakoutTest {
 
     @Test
     void firstDayOnlyBuildsLevels() {
-        assertTrue(PreviousDayBreakout.run(dayOne()).isEmpty());
+        assertTrue(new PreviousDayBreakout().run(dayOne()).isEmpty());
     }
 
     @Test
@@ -49,7 +49,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY2, "09:25", 1103, 1110, 1100, 1108));   // entry at open 1103: risk 8, target 1119
         c.add(candle(DAY2, "09:30", 1108, 1120, 1107, 1118));
 
-        Trade t = PreviousDayBreakout.run(c).get(0);
+        Trade t = new PreviousDayBreakout().run(c).get(0);
 
         assertEquals(Direction.LONG, t.getDirection());
         assertEquals(1100, t.getRangeHigh());
@@ -69,7 +69,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY2, "09:25", 893, 900, 885, 890));       // entry 893: risk 12, stop 905, target 869
         c.add(candle(DAY2, "09:30", 890, 910, 889, 908));       // high 910 >= stop 905
 
-        Trade t = PreviousDayBreakout.run(c).get(0);
+        Trade t = new PreviousDayBreakout().run(c).get(0);
 
         assertEquals(Direction.SHORT, t.getDirection());
         assertEquals(905, t.getStopLoss());
@@ -86,7 +86,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY2, "09:25", 1100, 1104, 1099, 1103));     // entry 1100 -> min risk 0.3% = 3.3
         c.add(candle(DAY2, "15:15", 1105, 1106, 1104, 1105));
 
-        Trade t = PreviousDayBreakout.run(c).get(0);
+        Trade t = new PreviousDayBreakout().run(c).get(0);
 
         assertEquals(1100 - 3.3, t.getStopLoss(), 1e-9);
         assertEquals(1100 + 6.6, t.getTarget(), 1e-9);
@@ -100,7 +100,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY2, "09:25", 1126, 1140, 1120, 1138));
         c.add(candle(DAY2, "09:30", 1138, 1160, 1137, 1158));     // would have been a winner; still no trade
 
-        assertTrue(PreviousDayBreakout.run(c).isEmpty());
+        assertTrue(new PreviousDayBreakout().run(c).isEmpty());
     }
 
     @Test
@@ -109,7 +109,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY2, "09:15", 1120, 1130, 1115, 1128));     // opened above PDH 1100
         c.add(candle(DAY2, "09:20", 1128, 1140, 1127, 1139));
 
-        assertTrue(PreviousDayBreakout.run(c).isEmpty());
+        assertTrue(new PreviousDayBreakout().run(c).isEmpty());
     }
 
     @Test
@@ -123,7 +123,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY3, "09:20", 1050, 1066, 1058, 1065));
         c.add(candle(DAY3, "09:25", 1066, 1070, 1064, 1069));
 
-        List<Trade> trades = PreviousDayBreakout.run(c);
+        List<Trade> trades = new PreviousDayBreakout().run(c);
 
         assertEquals(1, trades.size());
         assertEquals(DAY3, trades.get(0).getDate());
@@ -143,7 +143,7 @@ class PreviousDayBreakoutTest {
         c.add(candle(DAY3, "09:15", 1250, 1260, 1240, 1255));
         c.add(candle(DAY3, "09:20", 1255, 1265, 1250, 1262));
 
-        List<Trade> trades = PreviousDayBreakout.run(c);
+        List<Trade> trades = new PreviousDayBreakout().run(c);
 
         assertEquals(1, trades.size());   // only day 2's trade; day 3 never broke 1300
         assertEquals(DAY2, trades.get(0).getDate());

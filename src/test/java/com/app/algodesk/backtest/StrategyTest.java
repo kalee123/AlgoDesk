@@ -28,6 +28,8 @@ class StrategyTest {
         double minRisk = 0;
         double maxRisk = Double.MAX_VALUE;
 
+        @Override public String name() { return "Long at 09:20"; }
+        @Override public String description() { return "test only"; }
         @Override protected boolean onNewDay(LocalDate day, CandleInfo first) { return tradeToday; }
         @Override protected void onCandle(CandleInfo candle, LocalTime time) { }
         @Override protected Signal entrySignal(CandleInfo candle, LocalTime time) {

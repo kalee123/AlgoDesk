@@ -26,8 +26,12 @@
 
             <div class="bt-field">
                 <span class="label">Strategy</span>
-                <!-- Options come from GET /api/strategies -->
-                <select id="strategy" class="search-input"></select>
+                <!-- Custom dropdown (same <details> trick as the account menu): a native <select> opens an
+                     OS-styled menu that ignores the theme. Options come from GET /api/strategies. -->
+                <details class="dropdown" id="strategy-dropdown">
+                    <summary class="search-input dropdown-value" id="strategy-value">Loading…</summary>
+                    <ul class="dropdown-list" id="strategies" role="listbox" aria-label="Strategy"></ul>
+                </details>
                 <p class="muted small bt-hint" id="strategy-hint"></p>
             </div>
 

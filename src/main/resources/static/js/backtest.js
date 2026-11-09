@@ -73,24 +73,44 @@ document.addEventListener("click", e => {
 
 // ---------- Strategies (from the server) ----------
 
-const strategySelect = document.getElementById("strategy");
-let strategies = {};   // code -> {code, name, description}
+const strategyDropdown = document.getElementById("strategy-dropdown");
+const strategyList = document.getElementById("strategies");
+let strategies = {};          // code -> {code, name, description}
+let currentStrategy = null;
 
 async function loadStrategies() {
     const list = await api("/api/strategies");
     strategies = Object.fromEntries(list.map(s => [s.code, s]));
-    strategySelect.innerHTML = list.map(s =>
-        `<option value="${escapeHtml(s.code)}">${escapeHtml(s.name)}</option>`).join("");
+    strategyList.innerHTML = list.map(s => `
+        <li><button type="button" role="option" data-strategy="${escapeHtml(s.code)}">${escapeHtml(s.name)}</button></li>`
+    ).join("");
+    currentStrategy = list.length ? list[0].code : null;
 }
 
-function updateHint() {
-    const s = strategies[strategySelect.value];
+// Shows the name in the closed box, marks the option, shows the description, updates the address bar
+function selectStrategy(code) {
+    currentStrategy = code;
+    const s = strategies[code];
+    document.getElementById("strategy-value").textContent = s ? s.name : "Choose a strategy";
+    strategyList.querySelectorAll("button").forEach(b =>
+        b.classList.toggle("selected", b.dataset.strategy === code));
     document.getElementById("strategy-hint").textContent = s ? s.description : "";
+    history.replaceState(null, "", `/backtest/${encodeURIComponent(code)}`);
 }
 
-strategySelect.addEventListener("change", () => {
-    updateHint();
-    history.replaceState(null, "", `/backtest/${encodeURIComponent(strategySelect.value)}`);
+strategyList.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (b) {
+        selectStrategy(b.dataset.strategy);
+        strategyDropdown.open = false;
+    }
+});
+
+// Close when clicking anywhere else, like the account menu
+document.addEventListener("click", e => {
+    if (strategyDropdown.open && !strategyDropdown.contains(e.target)) {
+        strategyDropdown.open = false;
+    }
 });
 
 // ---------- Interval + period buttons ----------
@@ -167,7 +187,7 @@ form.addEventListener("submit", e => {
     showFormError("");
     const params = {
         exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
-        from: p.from, to: p.to, strategy: strategySelect.value,
+        from: p.from, to: p.to, strategy: currentStrategy,
     };
     saveSetup();
     run(params);
@@ -177,7 +197,6 @@ form.addEventListener("submit", e => {
 const SETUP_KEY = "algodesk.backtest";
 
 function saveSetup() {
-    history.replaceState(null, "", `/backtest/${encodeURIComponent(strategySelect.value)}`);
     try {
         localStorage.setItem(SETUP_KEY, JSON.stringify({
             selected, interval: currentInterval, range: rangeDays,
@@ -391,10 +410,7 @@ async function init() {
         return;
     }
     const pathStrategy = decodeURIComponent(window.location.pathname.split("/")[2] || "");
-    if (strategies[pathStrategy]) {
-        strategySelect.value = pathStrategy;
-    }
-    updateHint();
+    selectStrategy(strategies[pathStrategy] ? pathStrategy : currentStrategy);
 
     const saved = loadSetup();
     if (document.querySelector(`#intervals [data-interval="${saved.interval}"]`)) {
@@ -416,7 +432,7 @@ async function init() {
         const p = period();
         if (p.from && p.to) {
             run({ exchange: selected.exchange, symbol: selected.symbol, interval: currentInterval,
-                  from: p.from, to: p.to, strategy: strategySelect.value });
+                  from: p.from, to: p.to, strategy: currentStrategy });
         }
     }
 }

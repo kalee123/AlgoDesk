@@ -12,13 +12,16 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 // Opening Range Breakout on intraday candles (built for 5minute), at most one trade per day:
 //  1. Range: high/low of the candles before 09:30 (09:15, 09:20, 09:25)
 //  2. Signal: first candle that CLOSES above the range high (long) or below the range low (short)
 //  3. Entry: the NEXT candle's open, so we never trade on a price we couldn't have known yet
 //  4. Stop: the other side of the range. Target: 2 x risk. Square off at 15:15 if neither is hit.
 // Pure logic, no I/O: a new instance per run holds the state, so it's easy to unit test.
-public class OpeningRangeBreakout {
+@Component("orb")
+public class OpeningRangeBreakout implements TradingStrategy {
 
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     static final LocalTime RANGE_END = LocalTime.of(9, 30);
@@ -38,11 +41,21 @@ public class OpeningRangeBreakout {
     private Trade trade;              // the open trade, if any
     private CandleInfo previous;
 
-    private OpeningRangeBreakout() {
+    @Override
+    public String name() {
+        return "Opening Range Breakout";
     }
 
-    // candles must be oldest first (as Kite returns them)
-    public static List<Trade> run(List<CandleInfo> candles) {
+    @Override
+    public String description() {
+        return "Range 09:15–09:30 · enter on the first close outside it · stop = other side of the range · "
+                + "target 2× risk · square off 15:15 · one trade a day.";
+    }
+
+    // candles must be oldest first (as Kite returns them).
+    // The Spring bean is a singleton shared by every request, so each run uses a fresh instance for its state.
+    @Override
+    public List<Trade> run(List<CandleInfo> candles) {
         OpeningRangeBreakout orb = new OpeningRangeBreakout();
         for (CandleInfo candle : candles) {
             orb.onCandle(candle);

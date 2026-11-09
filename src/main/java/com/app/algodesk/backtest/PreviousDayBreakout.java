@@ -12,6 +12,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 // Previous Day High/Low breakout on intraday candles, at most one trade per day:
 //  1. Levels: PDH / PDL = highest high / lowest low of the previous trading day, built from the same candles
 //  2. Signal: first candle that CLOSES above PDH (long) or below PDL (short), before 15:00
@@ -23,7 +25,8 @@ import java.util.List;
 // The first day in the data has no previous day, so it only builds levels.
 // Deliberately a copy of OpeningRangeBreakout's trade management for now; the shared engine is extracted
 // once a third strategy shows what is really common.
-public class PreviousDayBreakout {
+@Component("pdb")
+public class PreviousDayBreakout implements TradingStrategy {
 
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     static final LocalTime LAST_SIGNAL = LocalTime.of(15, 0);
@@ -47,11 +50,21 @@ public class PreviousDayBreakout {
     private Trade trade;
     private CandleInfo previous;
 
-    private PreviousDayBreakout() {
+    @Override
+    public String name() {
+        return "Previous Day High/Low Breakout";
     }
 
-    // candles must be oldest first (as Kite returns them)
-    public static List<Trade> run(List<CandleInfo> candles) {
+    @Override
+    public String description() {
+        return "Levels = previous day's high and low · enter on the first close beyond one · stop = signal candle's "
+                + "low/high (min 0.3%, skip above 1.5%) · target 2× risk · square off 15:15 · gap days skipped.";
+    }
+
+    // candles must be oldest first (as Kite returns them).
+    // The Spring bean is a singleton shared by every request, so each run uses a fresh instance for its state.
+    @Override
+    public List<Trade> run(List<CandleInfo> candles) {
         PreviousDayBreakout pdb = new PreviousDayBreakout();
         for (CandleInfo candle : candles) {
             pdb.onCandle(candle);

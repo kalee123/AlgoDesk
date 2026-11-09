@@ -24,11 +24,11 @@ import java.util.List;
 //       in a trade     -> manageTrade
 //       signal pending -> enter at this candle's open
 //       otherwise      -> entrySignal(...) until lastEntryTime
-public abstract class Strategy {
+public abstract class Strategy implements TradingStrategy {
 
     protected static final ZoneId IST = ZoneId.of("Asia/Kolkata");
 
-    private final List<Trade> trades = new ArrayList<>();
+    private List<Trade> trades = new ArrayList<>();
     private LocalDate day;
     private boolean dayDone;
     private int tradesToday;
@@ -61,8 +61,17 @@ public abstract class Strategy {
 
     // ---------- the engine ----------
 
-    // candles must be oldest first (as Kite returns them)
-    public final List<Trade> run(List<CandleInfo> candles) {
+    // candles must be oldest first (as Kite returns them).
+    // Subclasses are singleton Spring beans, so the run state is reset here and runs can't overlap.
+    @Override
+    public final synchronized List<Trade> run(List<CandleInfo> candles) {
+        trades = new ArrayList<>();
+        day = null;
+        dayDone = false;
+        tradesToday = 0;
+        pending = null;
+        trade = null;
+        previous = null;
         for (CandleInfo candle : candles) {
             ZonedDateTime t = Instant.ofEpochSecond(candle.getTime()).atZone(IST);
             LocalTime time = t.toLocalTime();

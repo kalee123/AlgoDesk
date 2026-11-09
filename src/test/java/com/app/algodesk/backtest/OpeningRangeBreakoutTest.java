@@ -52,7 +52,7 @@ class OpeningRangeBreakoutTest {
         candles.add(candle("09:40", 109, 123, 108, 122));
         candles.add(candle("09:45", 122, 131, 121, 130));   // another breakout later: still one trade a day
 
-        List<Trade> trades = OpeningRangeBreakout.run(candles);
+        List<Trade> trades = new OpeningRangeBreakout().run(candles);
 
         assertEquals(1, trades.size());
         Trade t = trades.get(0);
@@ -75,7 +75,7 @@ class OpeningRangeBreakoutTest {
         candles.add(candle("09:35", 97, 99, 95, 96));
         candles.add(candle("09:40", 96, 106, 96, 104));
 
-        Trade t = OpeningRangeBreakout.run(candles).get(0);
+        Trade t = new OpeningRangeBreakout().run(candles).get(0);
 
         assertEquals(Direction.SHORT, t.getDirection());
         assertEquals(97, t.getEntryPrice());
@@ -90,7 +90,7 @@ class OpeningRangeBreakoutTest {
         List<CandleInfo> candles = longEntry(DAY);
         candles.add(candle("09:40", 109, 123, 97, 110));
 
-        Trade t = OpeningRangeBreakout.run(candles).get(0);
+        Trade t = new OpeningRangeBreakout().run(candles).get(0);
 
         assertEquals("STOP_LOSS", t.getExitReason());
         assertEquals(-8, t.getPnl());
@@ -101,7 +101,7 @@ class OpeningRangeBreakoutTest {
         List<CandleInfo> candles = longEntry(DAY);
         candles.add(candle("09:40", 95, 96, 94, 95));
 
-        Trade t = OpeningRangeBreakout.run(candles).get(0);
+        Trade t = new OpeningRangeBreakout().run(candles).get(0);
 
         assertEquals(95, t.getExitPrice());
         assertEquals(-11, t.getPnl());
@@ -113,7 +113,7 @@ class OpeningRangeBreakoutTest {
         candles.add(candle("09:40", 106, 108, 104, 107));
         candles.add(candle("15:15", 110, 111, 109, 110));
 
-        Trade t = OpeningRangeBreakout.run(candles).get(0);
+        Trade t = new OpeningRangeBreakout().run(candles).get(0);
 
         assertEquals("SQUARE_OFF", t.getExitReason());
         assertEquals(110, t.getExitPrice());
@@ -125,7 +125,7 @@ class OpeningRangeBreakoutTest {
         List<CandleInfo> candles = longEntry(DAY);
         candles.add(candle("09:40", 109, 112, 107, 111));
 
-        Trade t = OpeningRangeBreakout.run(candles).get(0);
+        Trade t = new OpeningRangeBreakout().run(candles).get(0);
 
         assertEquals("DAY_END", t.getExitReason());
         assertEquals(111, t.getExitPrice());
@@ -137,7 +137,7 @@ class OpeningRangeBreakoutTest {
         candles.add(candle("09:30", 101, 104, 99, 102));
         candles.add(candle("15:20", 102, 104, 101, 103));
 
-        assertTrue(OpeningRangeBreakout.run(candles).isEmpty());
+        assertTrue(new OpeningRangeBreakout().run(candles).isEmpty());
     }
 
     @Test
@@ -148,7 +148,7 @@ class OpeningRangeBreakoutTest {
         candles.addAll(longEntry(nextDay));
         candles.add(candle(nextDay, "09:40", 109, 123, 108, 122));
 
-        List<Trade> trades = OpeningRangeBreakout.run(candles);
+        List<Trade> trades = new OpeningRangeBreakout().run(candles);
 
         assertEquals(2, trades.size());
         assertEquals(DAY, trades.get(0).getDate());
