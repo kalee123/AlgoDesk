@@ -8,16 +8,16 @@ import java.util.List;
 public class BacktestResult {
 
     private final List<CandleInfo> candles;
-    private final List<Trade> trades;
+    private final List<TradeDetails> trades;
     private final BacktestSummary summary;
 
-    public BacktestResult(List<CandleInfo> candles, List<Trade> trades) {
+    public BacktestResult(List<CandleInfo> candles, List<TradeDetails> trades) {
         this.candles = candles;
         this.trades = trades;
         this.summary = new BacktestSummary(trades);
     }
 
     public List<CandleInfo> getCandles() { return candles; }
-    public List<Trade> getTrades() { return trades; }
+    public List<TradeDetails> getTrades() { return trades; }
     public BacktestSummary getSummary() { return summary; }
 }

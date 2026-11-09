@@ -6,7 +6,7 @@ import com.app.algodesk.exception.ApiExceptionHandler;
 import com.app.algodesk.models.BacktestResult;
 import com.app.algodesk.models.CandleInfo;
 import com.app.algodesk.models.HistoricalDataRequest;
-import com.app.algodesk.models.Trade;
+import com.app.algodesk.models.TradeDetails;
 import com.app.algodesk.service.StrategyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class StrategiesControllerTest {
         return new TradingStrategy() {
             @Override public String name() { return name; }
             @Override public String description() { return name + " rules"; }
-            @Override public List<Trade> run(List<CandleInfo> candles) { return List.of(); }
+            @Override public List<TradeDetails> run(List<CandleInfo> candles) { return List.of(); }
         };
     }
 

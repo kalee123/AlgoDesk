@@ -23,7 +23,7 @@ public class BacktestSummary {
     private double worstTrade;
     private final Map<String, Integer> exitReasons = new TreeMap<>();   // TARGET -> 12, STOP_LOSS -> 20, ...
 
-    public BacktestSummary(List<Trade> tradeList) {
+    public BacktestSummary(List<TradeDetails> tradeList) {
         trades = tradeList.size();
         if (trades == 0) {
             return;
@@ -35,7 +35,7 @@ public class BacktestSummary {
         bestTrade = -Double.MAX_VALUE;
         worstTrade = Double.MAX_VALUE;
 
-        for (Trade t : tradeList) {
+        for (TradeDetails t : tradeList) {
             double pnl = t.getPnl();
             if (pnl > 0) {
                 wins++;

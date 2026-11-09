@@ -1,8 +1,8 @@
 package com.app.algodesk.backtest;
 
 import com.app.algodesk.models.CandleInfo;
-import com.app.algodesk.models.Trade;
-import com.app.algodesk.models.Trade.Direction;
+import com.app.algodesk.models.TradeDetails;
+import com.app.algodesk.models.TradeDetails.Direction;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,13 +32,13 @@ public class OpeningRangeBreakout implements TradingStrategy {
     // Each day walks through these in order; a new day starts again at BUILD_RANGE
     private enum Phase { BUILD_RANGE, WAIT_BREAKOUT, IN_TRADE, DONE }
 
-    private final List<Trade> trades = new ArrayList<>();
+    private final List<TradeDetails> trades = new ArrayList<>();
     private LocalDate day;
     private Phase phase;
     private double rangeHigh;
     private double rangeLow;
     private Direction pendingEntry;   // breakout seen on the previous candle; enter at this candle's open
-    private Trade trade;              // the open trade, if any
+    private TradeDetails trade;              // the open trade, if any
     private CandleInfo previous;
 
     @Override
@@ -55,7 +55,7 @@ public class OpeningRangeBreakout implements TradingStrategy {
     // candles must be oldest first (as Kite returns them).
     // The Spring bean is a singleton shared by every request, so each run uses a fresh instance for its state.
     @Override
-    public List<Trade> run(List<CandleInfo> candles) {
+    public List<TradeDetails> run(List<CandleInfo> candles) {
         OpeningRangeBreakout orb = new OpeningRangeBreakout();
         for (CandleInfo candle : candles) {
             orb.onCandle(candle);
@@ -136,7 +136,15 @@ public class OpeningRangeBreakout implements TradingStrategy {
         double risk = Math.abs(entry - stop);
         double target = direction == Direction.LONG ? entry + REWARD_TO_RISK * risk : entry - REWARD_TO_RISK * risk;
 
-        trade = new Trade(day, direction, rangeHigh, rangeLow, candle.getTime(), entry, stop, target);
+        trade = new TradeDetails();
+        trade.setDate(day);
+        trade.setDirection(direction);
+        trade.setRangeHigh(rangeHigh);
+        trade.setRangeLow(rangeLow);
+        trade.setEntryTime(candle.getTime());
+        trade.setEntryPrice(entry);
+        trade.setStopLoss(stop);
+        trade.setTarget(target);
         phase = Phase.IN_TRADE;
         manageTrade(candle, time);   // the entry candle itself can already hit the stop or target
     }

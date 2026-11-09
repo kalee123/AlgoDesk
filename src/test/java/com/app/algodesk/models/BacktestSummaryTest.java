@@ -1,6 +1,6 @@
 package com.app.algodesk.models;
 
-import com.app.algodesk.models.Trade.Direction;
+import com.app.algodesk.models.TradeDetails.Direction;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +12,16 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class BacktestSummaryTest {
 
-    private static Trade trade(Direction direction, double entry, double exit, String reason) {
-        Trade t = new Trade(LocalDate.of(2025, 3, 12), direction, 105, 98, 1000, entry, 98, 122);
+    private static TradeDetails trade(Direction direction, double entry, double exit, String reason) {
+        TradeDetails t = new TradeDetails();
+        t.setDate(LocalDate.of(2025, 3, 12));
+        t.setDirection(direction);
+        t.setRangeHigh(105);
+        t.setRangeLow(98);
+        t.setEntryTime(1000);
+        t.setEntryPrice(entry);
+        t.setStopLoss(98);
+        t.setTarget(122);
         t.close(2000, exit, reason);
         return t;
     }
@@ -21,7 +29,7 @@ class BacktestSummaryTest {
     @Test
     void computesWinsLossesAndRatios() {
         // pnl: +16, -8, +4 (short 97 -> 93), -8  => total +4, equity path 16, 8, 12, 4 -> peak 16, trough 4 => dd 12
-        List<Trade> trades = List.of(
+        List<TradeDetails> trades = List.of(
                 trade(Direction.LONG, 106, 122, "TARGET"),
                 trade(Direction.LONG, 106, 98, "STOP_LOSS"),
                 trade(Direction.SHORT, 97, 93, "SQUARE_OFF"),

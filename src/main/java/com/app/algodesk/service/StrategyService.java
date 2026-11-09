@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
@@ -28,6 +29,7 @@ public class StrategyService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Intraday strategies need intraday candles, e.g. 5minute");
         }
         List<CandleInfo> candles = candleService.getHistoricCandles(request);
+//        LinkedHashMap<String, List<CandleInfo>> map = getCandlesByDate(candles);
         return new BacktestResult(candles, strategy.run(candles));
     }
 }

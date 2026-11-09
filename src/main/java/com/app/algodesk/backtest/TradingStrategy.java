@@ -1,7 +1,7 @@
 package com.app.algodesk.backtest;
 
 import com.app.algodesk.models.CandleInfo;
-import com.app.algodesk.models.Trade;
+import com.app.algodesk.models.TradeDetails;
 
 import java.util.List;
 
@@ -17,5 +17,5 @@ public interface TradingStrategy {
 
     // Runs the strategy over candles (oldest first) and returns the closed trades.
     // Beans are singletons, so an implementation must not keep per-run state in its fields across calls.
-    List<Trade> run(List<CandleInfo> candles);
+    List<TradeDetails> run(List<CandleInfo> candles);
 }

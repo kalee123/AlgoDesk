@@ -14,12 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -132,4 +130,13 @@ public class CandleService {
     private static String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
+
+//    public LinkedHashMap<String, List<CandleInfo>> getCandlesByDate(List<CandleInfo> candles) {
+//        LinkedHashMap<String, List<CandleInfo>> candlesByDate = new LinkedHashMap<>();
+//        for (CandleInfo candle : candles) {
+//            String date = Instant.ofEpochSecond(candle.getTime()).atZone(IST).toLocalDate().toString();
+//            candlesByDate.computeIfAbsent(date, d -> new ArrayList<>()).add(candle);
+//        }
+//        return candlesByDate;
+//    }
 }

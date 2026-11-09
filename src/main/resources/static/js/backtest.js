@@ -95,6 +95,7 @@ function selectStrategy(code) {
     strategyList.querySelectorAll("button").forEach(b =>
         b.classList.toggle("selected", b.dataset.strategy === code));
     document.getElementById("strategy-hint").textContent = s ? s.description : "";
+    updateIntervalHint();
     history.replaceState(null, "", `/backtest/${encodeURIComponent(code)}`);
 }
 
@@ -121,6 +122,21 @@ let rangeDays = 90;   // number of days back from today, or "custom"
 function pick(groupId, attr, value) {
     document.querySelectorAll(`#${groupId} .interval`).forEach(b =>
         b.classList.toggle("active", b.dataset[attr] === String(value)));
+}
+
+// Opening-range strategies use the first candle of the day as the range, so its length is the candle interval
+const INTERVAL_MINUTES = { minute: 1, "3minute": 3, "5minute": 5, "15minute": 15, "30minute": 30 };
+
+function updateIntervalHint() {
+    const hint = document.getElementById("interval-hint");
+    const minutes = INTERVAL_MINUTES[currentInterval];
+    const isOrb = currentStrategy && currentStrategy.startsWith("orb");
+    hint.hidden = !isOrb || !minutes;
+    if (!hint.hidden) {
+        const end = 9 * 60 + 15 + minutes;
+        const hhmmEnd = `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
+        hint.textContent = `Opening range = first ${minutes}-min candle (09:15 – ${hhmmEnd})`;
+    }
 }
 
 function isoDate(d) {
@@ -151,6 +167,7 @@ document.getElementById("intervals").addEventListener("click", e => {
     if (b) {
         currentInterval = b.dataset.interval;
         pick("intervals", "interval", currentInterval);
+        updateIntervalHint();
     }
 });
 
@@ -417,6 +434,7 @@ async function init() {
         currentInterval = saved.interval;
         pick("intervals", "interval", currentInterval);
     }
+    updateIntervalHint();
     if (saved.range === "custom") {
         rangeDays = "custom";
         document.getElementById("from").value = saved.from || "";
