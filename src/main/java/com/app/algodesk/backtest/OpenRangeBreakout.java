@@ -10,13 +10,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 // My own customised ORB, kept next to the textbook OpeningRangeBreakout ("orb") so both can be compared.
-// Range = 09:15 candle of the selected interval. Entry when the wick breaks the range. 1:1 stop/target.
+// Range = 09:15 candle of the selected interval. Entry when the wick breaks the range.
+// Stop at the other side of the range, target REWARD_TO_RISK times that distance away (1:5).
 @Component("orb2")
 public class OpenRangeBreakout implements TradingStrategy {
 
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
 
-    private static final double STOP_POINTS = 25;   // stop and target distance in index points (1:1)
+    private static final double REWARD_TO_RISK = 5;   // target = 5x the risk (1:5)
 
     private static final LocalTime SQUARE_OFF = LocalTime.of(15, 15);   // close an open trade at this candle's open
 
@@ -55,17 +56,20 @@ public class OpenRangeBreakout implements TradingStrategy {
                         phase = Phase.DONE;     // can't tell which side broke first: skip the day
                     }
                     else if(checkValidEntry(candle, tradeDetails)){
-                        // Stop order at the range level; if the candle opens beyond it, the fill is the open
+                        // Stop order at the range level; if the candle opens beyond it, the fill is the open.
+                        // Stop = the other side of the 09:15 candle; target = REWARD_TO_RISK x that distance the other way.
                         double entry;
                         if(tradeDetails.getDirection() == TradeDetails.Direction.LONG){
                             entry = Math.max(candle.getOpen(), tradeDetails.getRangeHigh());
-                            tradeDetails.setTarget(entry + STOP_POINTS);
-                            tradeDetails.setStopLoss(entry - STOP_POINTS);
+                            double risk = entry - tradeDetails.getRangeLow();
+                            tradeDetails.setStopLoss(tradeDetails.getRangeLow());
+                            tradeDetails.setTarget(entry + REWARD_TO_RISK * risk);
                         }
                         else {
                             entry = Math.min(candle.getOpen(), tradeDetails.getRangeLow());
-                            tradeDetails.setTarget(entry - STOP_POINTS);
-                            tradeDetails.setStopLoss(entry + STOP_POINTS);
+                            double risk = tradeDetails.getRangeHigh() - entry;
+                            tradeDetails.setStopLoss(tradeDetails.getRangeHigh());
+                            tradeDetails.setTarget(entry - REWARD_TO_RISK * risk);
                         }
                         tradeDetails.setEntryPrice(entry);
                         tradeDetails.setEntryTime(candle.getTime());

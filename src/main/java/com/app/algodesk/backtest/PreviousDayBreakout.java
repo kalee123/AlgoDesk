@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 //  3. Entry: the NEXT candle's open
 //  4. Stop: the signal candle's low (long) / high (short), but at least MIN_RISK_PERCENT away.
 //     If the risk is more than MAX_RISK_PERCENT the entry is too far from the level: skip the day.
-//     Target: 2 x risk. Square off at 15:15.
+//     Target: 1.5 x risk. Square off at 15:15.
 // Gap days: if the day's first candle already opens beyond a level, the breakout happened overnight; skip the day.
 // The first day in the data has no previous day, so it only builds levels.
 // Deliberately a copy of OpeningRangeBreakout's trade management for now; the shared engine is extracted
@@ -31,7 +31,7 @@ public class PreviousDayBreakout implements TradingStrategy {
     private static final ZoneId IST = ZoneId.of("Asia/Kolkata");
     static final LocalTime LAST_SIGNAL = LocalTime.of(15, 0);
     static final LocalTime SQUARE_OFF = LocalTime.of(15, 15);
-    static final double REWARD_TO_RISK = 2.0;
+    static final double REWARD_TO_RISK = 1.5;
     static final double MIN_RISK_PERCENT = 0.3;   // stop never tighter than this (noise)
     static final double MAX_RISK_PERCENT = 1.5;   // wider than this means we're chasing: no trade
 
@@ -58,7 +58,7 @@ public class PreviousDayBreakout implements TradingStrategy {
     @Override
     public String description() {
         return "Levels = previous day's high and low · enter on the first close beyond one · stop = signal candle's "
-                + "low/high (min 0.3%, skip above 1.5%) · target 2× risk · square off 15:15 · gap days skipped.";
+                + "low/high (min 0.3%, skip above 1.5%) · target 1.5× risk · square off 15:15 · gap days skipped.";
     }
 
     // candles must be oldest first (as Kite returns them).

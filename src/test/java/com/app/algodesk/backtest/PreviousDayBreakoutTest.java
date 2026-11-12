@@ -46,7 +46,7 @@ class PreviousDayBreakoutTest {
         List<CandleInfo> c = dayOne();
         c.add(candle(DAY2, "09:15", 1000, 1020, 995, 1010));
         c.add(candle(DAY2, "09:20", 1010, 1105, 1095, 1102));   // closes above 1100, low 1095
-        c.add(candle(DAY2, "09:25", 1103, 1110, 1100, 1108));   // entry at open 1103: risk 8, target 1119
+        c.add(candle(DAY2, "09:25", 1103, 1110, 1100, 1108));   // entry at open 1103: risk 8, target 1115 (1.5x)
         c.add(candle(DAY2, "09:30", 1108, 1120, 1107, 1118));
 
         TradeDetails t = new PreviousDayBreakout().run(c).get(0);
@@ -56,9 +56,9 @@ class PreviousDayBreakoutTest {
         assertEquals(900, t.getRangeLow());
         assertEquals(1103, t.getEntryPrice());
         assertEquals(1095, t.getStopLoss());
-        assertEquals(1119, t.getTarget(), 1e-9);
+        assertEquals(1115, t.getTarget(), 1e-9);
         assertEquals("TARGET", t.getExitReason());
-        assertEquals(16, t.getPnl(), 1e-9);
+        assertEquals(12, t.getPnl(), 1e-9);
     }
 
     @Test
@@ -66,14 +66,14 @@ class PreviousDayBreakoutTest {
         List<CandleInfo> c = dayOne();
         c.add(candle(DAY2, "09:15", 950, 960, 930, 940));
         c.add(candle(DAY2, "09:20", 940, 905, 890, 895));       // closes below 900, high 905
-        c.add(candle(DAY2, "09:25", 893, 900, 885, 890));       // entry 893: risk 12, stop 905, target 869
+        c.add(candle(DAY2, "09:25", 893, 900, 885, 890));       // entry 893: risk 12, stop 905, target 875 (1.5x)
         c.add(candle(DAY2, "09:30", 890, 910, 889, 908));       // high 910 >= stop 905
 
         TradeDetails t = new PreviousDayBreakout().run(c).get(0);
 
         assertEquals(Direction.SHORT, t.getDirection());
         assertEquals(905, t.getStopLoss());
-        assertEquals(869, t.getTarget(), 1e-9);
+        assertEquals(875, t.getTarget(), 1e-9);
         assertEquals("STOP_LOSS", t.getExitReason());
         assertEquals(-12, t.getPnl(), 1e-9);
     }
@@ -89,7 +89,7 @@ class PreviousDayBreakoutTest {
         TradeDetails t = new PreviousDayBreakout().run(c).get(0);
 
         assertEquals(1100 - 3.3, t.getStopLoss(), 1e-9);
-        assertEquals(1100 + 6.6, t.getTarget(), 1e-9);
+        assertEquals(1100 + 1.5 * 3.3, t.getTarget(), 1e-9);
     }
 
     @Test

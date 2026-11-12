@@ -21,7 +21,7 @@ public class InstrumentController {
         this.candleService = candleService;
     }
 
-    // e.g. /api/instruments/search?q=reli
+    //  /api/instruments/search?q=reli
     @GetMapping("/search")
     public String search(@RequestParam(name = "q", defaultValue = "") String q) {
         return instrumentSearchService.search(q);
