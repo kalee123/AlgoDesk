@@ -6,6 +6,8 @@ It starts with the basics — logging in through Kite, viewing your account, ord
 
 > **Disclaimer:** This is a personal learning project, not financial advice and not production trading software. Automated trading can lose real money quickly. Test with small amounts or paper trading first.
 
+> 📖 **[Read my Learning Log](docs/LEARNING_LOG.md)**: why I started AlgoDesk after losing money trading, and what I've learned building it.
+
 ## Features
 
 **Available now**
@@ -122,6 +124,7 @@ Open [http://localhost:8080](http://localhost:8080) and log in with your Zerodha
 > Kite access tokens expire every day at 6 AM IST, so you'll need to log in again each trading day.
 
 ## Docs
+- **[Learning Log](docs/LEARNING_LOG.md)**: my story and what I'm learning
 - [Kite auth flow](docs/kite-auth-flow.md)
 - [Dashboard](docs/DASHBOARD.md)
 - [Architecture](docs/ARCHITECTURE.md)
