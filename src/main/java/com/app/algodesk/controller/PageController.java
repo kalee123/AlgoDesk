@@ -41,6 +41,12 @@ public class PageController {
         return page("backtest");
     }
 
+    // Runs several strategies at once via POST /api/strategies/backtest?codes=...
+    @GetMapping(value = "/compare", produces = MediaType.TEXT_HTML_VALUE)
+    public Resource compare() {
+        return page("compare");
+    }
+
     @GetMapping(value = "/logged-out", produces = MediaType.TEXT_HTML_VALUE)
     public Resource loggedOut() {
         return page("logged-out");

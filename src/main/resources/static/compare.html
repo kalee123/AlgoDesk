@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare · AlgoDesk</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/app.css">
+<script src="/js/theme.js"></script>
+</head>
+<body data-page="compare">
+<header id="app-nav" class="navbar"></header>
+
+<div class="workspace">
+    <!-- Left: setup -->
+    <aside class="watch-panel bt-setup">
+        <form id="setup" class="bt-form">
+            <div class="bt-field">
+                <span class="label">Instrument</span>
+                <div class="search-box">
+                    <input id="search" class="search-input" type="search" autocomplete="off" autofocus
+                           placeholder="Search eg: reliance, nifty 50" aria-label="Search instruments" required>
+                    <ul id="search-results" class="search-results" hidden></ul>
+                </div>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Strategies</span>
+                <!-- Checkboxes from GET /api/strategies; the ticked codes go to ?codes=orb,pdb -->
+                <div class="check-list" id="strategies" role="group" aria-label="Strategies">
+                    <span class="muted small">Loading…</span>
+                </div>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Candles</span>
+                <div class="interval-group" id="intervals" role="group" aria-label="Candle interval">
+                    <button type="button" class="interval" data-interval="minute">1m</button>
+                    <button type="button" class="interval" data-interval="3minute">3m</button>
+                    <button type="button" class="interval active" data-interval="5minute">5m</button>
+                    <button type="button" class="interval" data-interval="15minute">15m</button>
+                    <button type="button" class="interval" data-interval="30minute">30m</button>
+                </div>
+            </div>
+
+            <div class="bt-field">
+                <span class="label">Period (ends today)</span>
+                <div class="interval-group" id="ranges" role="group" aria-label="Period">
+                    <button type="button" class="interval" data-days="30">1M</button>
+                    <button type="button" class="interval" data-days="60">2M</button>
+                    <button type="button" class="interval active" data-days="90">3M</button>
+                    <button type="button" class="interval" data-days="custom">Custom</button>
+                </div>
+                <div id="custom-range" class="bt-dates" hidden>
+                    <input id="from" class="search-input" type="date" aria-label="From">
+                    <span class="muted">to</span>
+                    <input id="to" class="search-input" type="date" aria-label="To">
+                </div>
+                <p id="range-text" class="muted small"></p>
+            </div>
+
+            <button type="submit" class="button bt-run" id="run">Compare strategies</button>
+            <p id="form-error" class="bt-error" hidden></p>
+        </form>
+    </aside>
+
+    <!-- Right: results -->
+    <section class="chart-panel bt-results">
+        <div id="status" class="chart-empty">Pick an instrument and two or more strategies, then compare</div>
+
+        <div id="content" hidden>
+            <div class="bt-head">
+                <span id="title" class="symbol"></span>
+                <!-- Round-trip time: watch it drop when the strategies run on threads instead of one by one -->
+                <span id="timing" class="muted small"></span>
+            </div>
+
+            <div class="table-wrap cmp-summary">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th class="num">Trades</th>
+                        <th class="num">Win rate</th>
+                        <th class="num">Total P&amp;L</th>
+                        <th class="num">Profit factor</th>
+                        <th class="num">Max drawdown</th>
+                        <th>Exits</th>
+                    </tr>
+                    </thead>
+                    <tbody id="summary-body"></tbody>
+                </table>
+            </div>
+
+            <div class="panel-head">
+                <h2>Trades</h2>
+                <div class="interval-group" id="trade-tabs" role="tablist" aria-label="Strategy trades"></div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Side</th>
+                        <th>Entry</th>
+                        <th>Exit</th>
+                        <th>Reason</th>
+                        <th class="num">P&amp;L</th>
+                        <th class="num">%</th>
+                    </tr>
+                    </thead>
+                    <tbody id="trades-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/compare.js"></script>
+</body>
+</html>

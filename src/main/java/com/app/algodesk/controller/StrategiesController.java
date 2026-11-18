@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/api/strategies", produces = MediaType.APPLICATION_JSON_VALUE)
 public class StrategiesController {
@@ -39,5 +41,35 @@ public class StrategiesController {
     public String backtest(@PathVariable String code, @RequestBody HistoricalDataRequest historicalData) throws Exception {
         BacktestResult result = strategyService.runStrategy(historicalData, code);
         return new JSONObject(result).toString();
+    }
+
+    // POST /api/strategies/backtest?codes=orb,pdb with the same JSON body as above
+    // -> {orb: {candles, trades, summary}, pdb: {...}}
+    @PostMapping("/backtest")
+    public String massBackTest(@RequestParam List<String> codes, @RequestBody HistoricalDataRequest historicalData) throws Exception {
+        JSONObject out = new JSONObject();
+        Thread t1= new Thread(()->{
+            try {
+                BacktestResult result = strategyService.runStrategy(historicalData, "orb");
+                out.put("orb", new JSONObject(result));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        Thread t2= new Thread(()->{
+            try {
+                BacktestResult result = strategyService.runStrategy(historicalData, "pdb");
+                out.put("pdb", new JSONObject(result));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        return out.toString();
     }
 }
