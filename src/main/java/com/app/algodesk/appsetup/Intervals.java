@@ -6,26 +6,30 @@ import java.util.Optional;
 
 import static com.app.algodesk.appsetup.FieldConstants.TOTAL_MARKET_MINUTES_PER_DAY;
 
-// Candle intervals Kite supports, with the longest range Kite returns in one historical request.
+// Candle intervals Kite supports: the longest range Kite returns in one historical request,
+// and the longest range we fetch in total (split into several requests).
 public enum Intervals {
 
-    MINUTE("minute", 1, 60),
-    THREE_MINUTE("3minute", 3, 100),
-    FIVE_MINUTE("5minute", 5, 100),
-    TEN_MINUTE("10minute", 10, 100),
-    FIFTEEN_MINUTE("15minute", 15, 200),
-    THIRTY_MINUTE("30minute", 30, 200),
-    SIXTY_MINUTE("60minute", 60, 400),
-    DAY("day", TOTAL_MARKET_MINUTES_PER_DAY, 2000);
+    //            code      min/candle  days/call  max total days
+    MINUTE("minute", 1, 60, 1200),
+    THREE_MINUTE("3minute", 3, 100, 2000),
+    FIVE_MINUTE("5minute", 5, 100, 2000),
+    TEN_MINUTE("10minute", 10, 100, 2000),
+    FIFTEEN_MINUTE("15minute", 15, 200, 4000),
+    THIRTY_MINUTE("30minute", 30, 200, 4000),
+    SIXTY_MINUTE("60minute", 60, 400, 8000),
+    DAY("day", TOTAL_MARKET_MINUTES_PER_DAY, 2000, 8000);
 
     private final String code;          // what Kite and the browser use, e.g. "5minute"
     private final int minutesPerCandle;
     private final int maxDays;          // max days Kite allows in one request
+    private final int maxTotalDays;     // max days we fetch in total; guards against typos like from=2010
 
-    Intervals(String code, int minutesPerCandle, int maxDays) {
+    Intervals(String code, int minutesPerCandle, int maxDays, int maxTotalDays) {
         this.code = code;
         this.minutesPerCandle = minutesPerCandle;
         this.maxDays = maxDays;
+        this.maxTotalDays = maxTotalDays;
     }
 
     public String getCode() {
@@ -40,8 +44,12 @@ public enum Intervals {
         return maxDays;
     }
 
+    public int getMaxTotalDays() {
+        return maxTotalDays;
+    }
+
     // "5minute" -> FIVE_MINUTE; empty when Kite has no such interval
-    public static Optional<Intervals> fromCode(String code) {
+    public static Optional<Intervals> getTimeframe(String code) {
         return Arrays.stream(values())
                 .filter(i -> i.code.equals(code))
                 .findFirst();
