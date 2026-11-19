@@ -3,7 +3,7 @@ package com.app.algodesk.exception;
 import com.app.algodesk.controller.InstrumentController;
 import com.app.algodesk.models.CandleInfo;
 import com.app.algodesk.service.CandleService;
-import com.app.algodesk.service.InstrumentSearchService;
+import com.app.algodesk.service.InstrumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -35,7 +35,7 @@ class ApiExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         candleService = mock(CandleService.class);
-        InstrumentController controller = new InstrumentController(mock(InstrumentSearchService.class), candleService);
+        InstrumentController controller = new InstrumentController(mock(InstrumentService.class), candleService);
         mvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();

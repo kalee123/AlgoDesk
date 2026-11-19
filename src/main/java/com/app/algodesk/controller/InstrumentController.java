@@ -2,7 +2,7 @@ package com.app.algodesk.controller;
 
 import com.app.algodesk.models.HistoricalDataRequest;
 import com.app.algodesk.service.CandleService;
-import com.app.algodesk.service.InstrumentSearchService;
+import com.app.algodesk.service.InstrumentService;
 import org.json.JSONArray;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/instruments", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InstrumentController {
 
-    private final InstrumentSearchService instrumentSearchService;
+    private final InstrumentService instrumentService;
     private final CandleService candleService;
 
-    public InstrumentController(InstrumentSearchService instrumentSearchService, CandleService candleService) {
-        this.instrumentSearchService = instrumentSearchService;
+    public InstrumentController(InstrumentService instrumentService, CandleService candleService) {
+        this.instrumentService = instrumentService;
         this.candleService = candleService;
     }
 
     //  /api/instruments/search?q=reli
     @GetMapping("/search")
     public String search(@RequestParam(name = "q", defaultValue = "") String q) {
-        return instrumentSearchService.search(q);
+        return instrumentService.search(q);
     }
 
     // e.g. /api/instruments/NSE/RELIANCE/candles?interval=5minute&from=2025-01-01&to=2025-03-31
