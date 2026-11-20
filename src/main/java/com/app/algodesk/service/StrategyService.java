@@ -28,7 +28,7 @@ public class StrategyService {
         if ("day".equals(request.getInterval())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Intraday strategies need intraday candles, e.g. 5minute");
         }
-        List<CandleInfo> candles = candleService.getHistoricCandles(request);
+        List<CandleInfo> candles = candleService.getBacktestCandles(request);
 //        LinkedHashMap<String, List<CandleInfo>> map = getCandlesByDate(candles);
         return new BacktestResult(candles, strategy.run(candles));
     }

@@ -43,7 +43,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void successPassesThrough() throws Exception {
-        when(candleService.getHistoricCandles(argThat(r -> r.getExchange().equals("NSE")
+        when(candleService.getChartCandles(argThat(r -> r.getExchange().equals("NSE")
                 && r.getSymbol().equals("RELIANCE") && r.getInterval().equals("day"))))
                 .thenReturn(List.of(new CandleInfo(1, 100, 110, 90, 105, 500)));
 
@@ -54,7 +54,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void responseStatusExceptionKeepsItsStatusAndReason() throws Exception {
-        when(candleService.getHistoricCandles(any()))
+        when(candleService.getChartCandles(any()))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown instrument NSE:NOPE"));
 
         mvc.perform(get("/api/instruments/NSE/NOPE/candles"))
@@ -71,7 +71,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void missingStaticFileIs404NotBadGateway() throws Exception {
-        when(candleService.getHistoricCandles(any()))
+        when(candleService.getChartCandles(any()))
                 .thenThrow(new NoResourceFoundException(HttpMethod.GET, "favicon.ico"));
 
         mvc.perform(get("/api/instruments/NSE/RELIANCE/candles"))
@@ -81,7 +81,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     void anyOtherExceptionIs502WithoutLeakingDetails() throws Exception {
-        when(candleService.getHistoricCandles(any()))
+        when(candleService.getChartCandles(any()))
                 .thenThrow(new IOException("connect timed out to api.kite.trade"));
 
         mvc.perform(get("/api/instruments/NSE/RELIANCE/candles"))

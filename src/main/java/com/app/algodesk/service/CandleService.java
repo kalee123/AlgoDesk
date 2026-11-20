@@ -19,12 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.app.algodesk.appsetup.FieldConstants.IST;
 import static com.app.algodesk.appsetup.FieldConstants.KITE_CANDLE_FORMAT;
@@ -36,6 +34,7 @@ public class CandleService {
 
     private static final Logger log = LoggerFactory.getLogger(CandleService.class);
     private static final int TARGET_CANDLES = 500;   // default range when no 'from' is given
+    private static final long KITE_CALL_GAP_MS = 350; // Kite allows ~3 historical calls a second
 
     private final KiteApiClient kiteApiClient;
     private final InstrumentService instrumentService;
@@ -50,19 +49,31 @@ public class CandleService {
         this.userAuthService = userAuthService;
     }
 
-    public List<CandleInfo> getHistoricCandles(HistoricalDataRequest request) throws Exception {
+    // Chart page: the browser draws every candle, so keep it to one Kite call (interval's maxDays)
+    public List<CandleInfo> getChartCandles(HistoricalDataRequest request) throws Exception {
+        return fetchCandles(request, false);
+    }
 
-        long instrumentToken = instrumentService.getInstrumentToken(request.getExchange(), request.getSymbol());
-        List<String>  kiteCandleUrlLists = getCandleUrls(request);
+    // Backtests: candles stay on the server, so allow long ranges (maxTotalDays), fetched in chunks
+    public List<CandleInfo> getBacktestCandles(HistoricalDataRequest request) throws Exception {
+        return fetchCandles(request, true);
+    }
+
+    // Shared engine for both: build chunk URLs, call Kite for each, join the candles (oldest first)
+    private List<CandleInfo> fetchCandles(HistoricalDataRequest request, boolean forBacktest) throws Exception {
+        List<String> kiteCandleUrls = getCandleUrls(request, forBacktest);
         List<CandleInfo> allCandles = new ArrayList<>();
-        for (String url : kiteCandleUrlLists) {
-            String candleData = getCandleData(url);
+        for (int i = 0; i < kiteCandleUrls.size(); i++) {
+            if (i > 0) {
+                Thread.sleep(KITE_CALL_GAP_MS);
+            }
+            String candleData = getCandleData(kiteCandleUrls.get(i));
             allCandles.addAll(getParsedCandle(candleData, request.isOi()));
         }
         return allCandles;
     }
 
-    private List<String> getCandleUrls(HistoricalDataRequest request) throws Exception{
+    private List<String> getCandleUrls(HistoricalDataRequest request, boolean forBacktest) throws Exception{
         long instrumentToken = instrumentService.getInstrumentToken(request.getExchange(), request.getSymbol());
         // The request carries the interval as text ("5minute"); turn it into the enum, 400 if unknown
         Intervals timeFrame = Intervals.getTimeframe(request.getInterval())
@@ -77,8 +88,11 @@ public class CandleService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'from' must not be after 'to'");
         }
 
-        if (!checkValidRange(timeFrame, startDate, endDate)) {
-            LocalDate trimmedStart = endDate.minusDays(timeFrame.getMaxTotalDays() - 1);
+        // The only difference between chart and backtest: how many days we allow in total
+        int allowedDays = forBacktest ? timeFrame.getMaxTotalDays() : timeFrame.getMaxDays();
+        if (!checkValidRange(allowedDays, startDate, endDate)) {
+            // Too long: keep the most recent days (recent data matters most)
+            LocalDate trimmedStart = endDate.minusDays(allowedDays - 1);
             log.warn("Range {} to {} too long for {}, trimmed to start at {}",
                     startDate, endDate, timeFrame.getCode(), trimmedStart);
             startDate = trimmedStart;
@@ -107,10 +121,10 @@ public class CandleService {
         return candleRange;
     }
 
-    // Each timeframe has its own total limit (Intervals.maxTotalDays), e.g. 1200 days of minute candles
-    private static boolean checkValidRange(Intervals interval, LocalDate startDate, LocalDate endDate) {
+    // allowedDays: maxDays for the chart, maxTotalDays for backtests (both per interval, see Intervals)
+    private static boolean checkValidRange(int allowedDays, LocalDate startDate, LocalDate endDate) {
         long totalDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;   // both ends included
-        if (totalDays <= interval.getMaxTotalDays()) {
+        if (totalDays <= allowedDays) {
             return true;
         }
         return false;

@@ -32,6 +32,6 @@ public class InstrumentController {
     @GetMapping("/{exchange}/{symbol}/candles")
     public String candles(HistoricalDataRequest request) throws Exception {
         // org.json reads the getters: [{time, open, high, low, close, volume}, ...]
-        return new JSONArray(candleService.getHistoricCandles(request)).toString();
+        return new JSONArray(candleService.getChartCandles(request)).toString();
     }
 }
